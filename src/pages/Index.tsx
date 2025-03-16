@@ -3,21 +3,46 @@ import {
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, Moon, CheckCircle, Clock, ListTodo 
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import MetricCard from '@/components/MetricCard';
 import MonthlyChart from '@/components/MonthlyChart';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Check if user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access the dashboard",
+        variant: "destructive",
+      });
+      navigate('/login');
+    }
+  }, [navigate, toast]);
 
   const handleMetricCardClick = (filter: 'all' | 'completed' | 'pending') => {
     setTaskFilter(filter);
     setActiveTab('dashboard');
+  };
+  
+  // Handles notification toggles
+  const handleNotificationToggle = (type: string) => {
+    toast({
+      title: `${type} notifications enabled`,
+      description: "You'll receive notifications for your tasks",
+    });
   };
 
   const renderContent = () => {
@@ -140,21 +165,21 @@ const Index = () => {
                       <p className="font-medium">Email Notifications</p>
                       <p className="text-sm text-gray-400">Receive task updates via email</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Email')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Due Date Reminders</p>
                       <p className="text-sm text-gray-400">Get reminders 5 minutes before due date</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Due date')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Push Notifications</p>
                       <p className="text-sm text-gray-400">Receive push notifications</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Push')} />
                   </div>
                 </div>
               </div>
@@ -180,14 +205,18 @@ const Index = () => {
                       <p className="font-medium">Dark Mode</p>
                       <p className="text-sm text-gray-400">Toggle dark mode</p>
                     </div>
-                    <Switch />
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Default Task View</p>
                       <p className="text-sm text-gray-400">Choose default task filter</p>
                     </div>
-                    <select className="bg-transparent border border-white/10 rounded-md px-2 py-1">
+                    <select 
+                      className="bg-transparent border border-white/10 rounded-md px-2 py-1"
+                      onChange={(e) => setTaskFilter(e.target.value as any)}
+                      value={taskFilter}
+                    >
                       <option value="all">All Tasks</option>
                       <option value="pending">Pending Only</option>
                       <option value="completed">Completed Only</option>
