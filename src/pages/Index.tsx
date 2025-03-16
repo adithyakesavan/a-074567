@@ -1,4 +1,3 @@
-
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, Moon, CheckCircle, Clock, ListTodo 
@@ -59,18 +58,21 @@ const Index = () => {
               <MetricCard
                 title="Total Tasks"
                 value={24}
+                total={24}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
                 value={8}
+                total={24}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
                 value={16}
+                total={24}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />
