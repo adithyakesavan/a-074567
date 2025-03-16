@@ -7,17 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
-    if (!email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -26,13 +28,23 @@ const Login = () => {
       return;
     }
     
-    // For demo purposes, we'll just simulate a login
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // For demo purposes, we'll just simulate a signup and login
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userEmail', email);
+    localStorage.setItem('userName', name);
     
     toast({
       title: "Success!",
-      description: "You have been logged in",
+      description: "Account created successfully",
     });
     
     navigate('/dashboard');
@@ -52,11 +64,23 @@ const Login = () => {
           >
             <Home className="w-6 h-6 text-white" />
           </button>
-          <h2 className="text-3xl font-bold">Welcome Back</h2>
-          <p className="text-gray-400 mt-2">Sign in to access your tasks</p>
+          <h2 className="text-3xl font-bold">Create Account</h2>
+          <p className="text-gray-400 mt-2">Sign up to start tracking your tasks</p>
         </div>
         
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              className="bg-white/10 border-white/20 text-white"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -81,16 +105,28 @@ const Login = () => {
             />
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="••••••••"
+              className="bg-white/10 border-white/20 text-white"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+          
           <Button type="submit" className="w-full bg-black hover:bg-black/80">
-            Sign In
+            Create Account
           </Button>
         </form>
         
         <div className="mt-6 text-center">
           <p className="text-gray-400">
-            Don't have an account?{' '}
-            <Button variant="link" className="text-dashboard-accent2 p-0" onClick={() => navigate('/signup')}>
-              Sign up
+            Already have an account?{' '}
+            <Button variant="link" className="text-dashboard-accent2 p-0" onClick={() => navigate('/login')}>
+              Sign in
             </Button>
           </p>
         </div>
@@ -99,4 +135,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

@@ -1,16 +1,22 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight } from 'lucide-react';
+import { CheckSquare, ArrowRight, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/components/ThemeProvider';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   
   const handleGetStarted = () => {
-    // For now, we'll just navigate to the dashboard
-    // Later we'll add auth check logic
-    navigate('/dashboard');
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (isLoggedIn) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -27,6 +33,14 @@ const Home = () => {
             onClick={() => navigate('/dashboard')}
           >
             Dashboard
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="text-white hover:text-white/80"
+          >
+            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
           <Button 
             variant="outline" 
@@ -48,7 +62,7 @@ const Home = () => {
           
           <div className="flex justify-center">
             <Button 
-              className="bg-dashboard-accent2 hover:bg-dashboard-accent2/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
+              className="bg-black hover:bg-black/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
               onClick={handleGetStarted}
             >
               Get Started
