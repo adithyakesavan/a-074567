@@ -58,19 +58,19 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
                 title="Total Tasks"
-                value={100}
+                value={24}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
-                value={35}
+                value={8}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
-                value={65}
+                value={16}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />
