@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -6,11 +7,12 @@ interface MetricCardProps {
   title: string;
   value: number;
   color: string;
+  onClick?: () => void;
 }
 
-const MetricCard = ({ title, value, color }: MetricCardProps) => {
+const MetricCard = ({ title, value, color, onClick }: MetricCardProps) => {
   return (
-    <div className="metric-card">
+    <div className="metric-card cursor-pointer hover:scale-105 transition-transform" onClick={onClick}>
       <div className="relative w-32 h-32 mb-6">
         <CircularProgressbar
           value={value}
