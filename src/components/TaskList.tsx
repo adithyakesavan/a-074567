@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import SearchBar from './SearchBar';
 
 // Define the Task interface
 export interface Task {
@@ -58,6 +58,8 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const [searchResults, setSearchResults] = useState<Task[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
   // Handle task completion toggle
@@ -68,7 +70,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       )
     );
     
-    // Show notification
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       toast({
@@ -83,11 +84,10 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     const taskToDelete = tasks.find(task => task.id === taskId);
     setTasks(tasks.filter((task) => task.id !== taskId));
     
-    // Show notification
     if (taskToDelete) {
       toast({
         title: "Task deleted",
-        description: `"${taskToDelete.title}" has been removed`,
+        description: `"${taskToDelete.title}" has been removed",
         variant: "destructive",
       });
     }
@@ -131,19 +131,27 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     });
   };
 
+  // Handle search results
+  const handleSearchResults = (results: Task[]) => {
+    setSearchResults(results);
+  };
+
+  // Handle clearing search results
+  const clearSearchResults = () => {
+    setSearchResults(null);
+  };
+
   // Filter tasks based on active filter
   const getFilteredTasks = () => {
-    let filtered = tasks;
+    let filtered = searchResults || tasks;
     
-    // Apply search filter
-    if (searchQuery) {
+    if (searchQuery && !searchResults) {
       filtered = filtered.filter(task => 
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
-    // Apply status filter
     if (activeFilter === 'completed') {
       return filtered.filter(task => task.completed);
     } else if (activeFilter === 'pending') {
@@ -190,20 +198,50 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-medium">Tasks</h2>
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search tasks..."
-              className="pl-8 w-64 bg-transparent"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
           <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
         </div>
+      </div>
+
+      <div className="mb-6 space-y-4">
+        <SearchBar onSearchResults={handleSearchResults} setIsLoading={setIsSearching} />
+        
+        <div className="relative flex items-center">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Filter tasks by keyword..."
+            className="pl-8 bg-transparent"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (searchResults) setSearchResults(null);
+            }}
+          />
+        </div>
+        
+        {searchResults && (
+          <div className="flex items-center justify-between bg-white/10 p-2 rounded">
+            <span className="text-sm text-gray-300">
+              Showing AI search results ({searchResults.length} tasks)
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearSearchResults}
+              className="text-gray-400 hover:text-white"
+            >
+              <X className="w-4 h-4 mr-1" /> Clear
+            </Button>
+          </div>
+        )}
+        
+        {isSearching && (
+          <div className="text-center py-2 text-gray-400">
+            Searching with AI...
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -368,3 +406,4 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
 };
 
 export default TaskList;
+
