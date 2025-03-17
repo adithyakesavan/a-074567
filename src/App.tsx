@@ -57,7 +57,7 @@ const AppRoutes = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="dark" storageKey="task-tracker-theme">
+    <ThemeProvider storageKey="task-tracker-theme">
       <AuthProvider>
         <TooltipProvider>
           <Toaster />

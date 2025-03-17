@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import SearchBar from './SearchBar';
+import NewTaskForm from './NewTaskForm';
 
 // Define the Task interface
 export interface Task {
@@ -61,6 +62,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [editForm, setEditForm] = useState<Partial<Task>>({});
   const [searchResults, setSearchResults] = useState<Task[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const { toast } = useToast();
 
   // Handle task completion toggle
@@ -132,6 +134,11 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     });
   };
 
+  // Handle adding a new task
+  const handleAddTask = (newTask: Task) => {
+    setTasks([...tasks, newTask]);
+  };
+
   // Handle search results
   const handleSearchResults = (results: Task[]) => {
     setSearchResults(results);
@@ -199,12 +206,22 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-medium">Tasks</h2>
         <div className="flex items-center gap-4">
-          <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
+          <Button 
+            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
+            onClick={() => setIsNewTaskOpen(true)}
+          >
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
         </div>
       </div>
+
+      {/* New Task Dialog */}
+      <NewTaskForm 
+        open={isNewTaskOpen} 
+        onOpenChange={setIsNewTaskOpen}
+        onTaskCreate={handleAddTask}
+      />
 
       <div className="mb-6 space-y-4">
         <SearchBar onSearchResults={handleSearchResults} setIsLoading={setIsSearching} />

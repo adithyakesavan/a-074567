@@ -1,9 +1,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Settings, Users, Home, Info, Mail, LogOut, CheckSquare, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Settings, Home, Info, LogOut, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/context/AuthContext";
 
 interface SidePanelProps {
@@ -13,7 +12,6 @@ interface SidePanelProps {
 const SidePanel = ({ onTabChange }: SidePanelProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   
   // Get user email from auth context or fallback
@@ -46,10 +44,6 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
   const handleMyTasks = () => {
     onTabChange('dashboard');
   };
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
   
   return (
     <div className="h-screen fixed left-0 top-0 w-64 glass-card border-r border-white/10">
@@ -76,11 +70,11 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
                 Dashboard
               </TabsTrigger>
               <TabsTrigger 
-                value="users" 
+                value="about" 
                 className="w-full justify-start gap-2 data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
-                <Users className="w-4 h-4" />
-                Users
+                <Info className="w-4 h-4" />
+                About
               </TabsTrigger>
               <TabsTrigger 
                 value="settings" 
@@ -98,23 +92,6 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
           >
             <Home className="w-4 h-4" />
             Home
-          </button>
-          
-          <button 
-            className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors"
-            onClick={toggleTheme}
-          >
-            {theme === "light" ? (
-              <>
-                <Moon className="w-4 h-4" />
-                Dark Mode
-              </>
-            ) : (
-              <>
-                <Sun className="w-4 h-4" />
-                Light Mode
-              </>
-            )}
           </button>
         </div>
         
