@@ -33,13 +33,13 @@ const MetricCard = ({ title, value, total = 100, color, onClick }: MetricCardPro
           })}
         />
         {total > 0 && (
-          <div className="absolute -bottom-2 left-0 right-0 text-xs text-center text-dashboard-muted">
+          <div className="absolute -bottom-6 left-0 right-0 text-xs text-center text-dashboard-muted">
             of {total} total
           </div>
         )}
       </div>
       
-      <h3 className="text-lg font-medium text-dashboard-text mb-2">{title}</h3>
+      <h3 className="text-lg font-medium text-dashboard-text mb-2 mt-6">{title}</h3>
       
       <div className="w-full mt-1">
         <Progress 
