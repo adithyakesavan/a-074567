@@ -4,6 +4,7 @@ import { LayoutDashboard, Settings, Users, Home, Info, Mail, LogOut, CheckSquare
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/context/AuthContext";
 
 interface SidePanelProps {
   onTabChange: (value: string) => void;
@@ -13,25 +14,33 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
   
-  const userEmail = localStorage.getItem('userEmail') || 'john.smith@example.com';
+  // Get user email from auth context or fallback
+  const userEmail = user?.email || 'user@example.com';
   const initials = userEmail.split('@')[0].charAt(0).toUpperCase() + 
                   (userEmail.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '');
   
-  const handleSignOut = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('token');
-    
-    // Show toast notification
-    toast({
-      title: "Signed out",
-      description: "You have been signed out successfully",
-    });
-    
-    // Navigate to home page
-    navigate('/');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      
+      // Show toast notification
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+      
+      // Navigate to home page
+      navigate('/');
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem signing out",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleMyTasks = () => {
