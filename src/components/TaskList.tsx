@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -74,7 +75,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (task) {
       toast({
         title: task.completed ? "Task unmarked" : "Task completed",
-        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`,
+        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`
       });
     }
   };
@@ -87,8 +88,8 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (taskToDelete) {
       toast({
         title: "Task deleted",
-        description: `"${taskToDelete.title}" has been removed",
-        variant: "destructive",
+        description: `"${taskToDelete.title}" has been removed`,
+        variant: "destructive"
       });
     }
   };
@@ -111,7 +112,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
@@ -127,7 +128,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     
     toast({
       title: "Task updated",
-      description: `"${editForm.title}" has been updated`,
+      description: `"${editForm.title}" has been updated`
     });
   };
 
@@ -406,4 +407,3 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
 };
 
 export default TaskList;
-
