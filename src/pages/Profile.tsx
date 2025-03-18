@@ -21,14 +21,23 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        // Using different approach to query tasks
-        const { count, error } = await supabase
-          .from('tasks')
-          .select('*', { count: 'exact', head: true })
-          .eq('user', user.id);
+        // Using a raw query to count tasks
+        const { data, error } = await supabase
+          .rpc('count_user_tasks', { user_id: user.id });
         
-        if (error) throw error;
-        setTaskCount(count || 0);
+        if (error) {
+          console.error('Error with RPC:', error);
+          // Fallback to a regular count query if RPC fails
+          const { count: fallbackCount, error: fallbackError } = await supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+          
+          if (fallbackError) throw fallbackError;
+          setTaskCount(fallbackCount || 0);
+        } else {
+          setTaskCount(data || 0);
+        }
       } catch (error) {
         console.error('Error fetching task count:', error);
         toast({

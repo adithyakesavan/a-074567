@@ -1,21 +1,37 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight } from 'lucide-react';
+import { CheckSquare, ArrowRight, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   
   const handleGetStarted = () => {
     // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       navigate('/dashboard');
     } else {
       navigate('/login');
     }
   };
+
+  const handleProfileClick = () => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    } else {
+      navigate('/login');
+    }
+  };
+
+  // Get user initials for avatar if user exists
+  const userInitials = user?.email 
+    ? user.email.split('@')[0].charAt(0).toUpperCase() + 
+      (user.email.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '')
+    : 'G';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
@@ -39,13 +55,24 @@ const Home = () => {
           >
             Contact
           </Button>
-          <Button 
-            variant="outline" 
-            className="border-white/20 text-white hover:bg-white/10"
-            onClick={() => navigate('/login')}
-          >
-            Login
-          </Button>
+          {isAuthenticated ? (
+            <div 
+              className="cursor-pointer"
+              onClick={handleProfileClick}
+            >
+              <Avatar className="h-9 w-9 bg-dashboard-accent1 hover:ring-2 hover:ring-white/20">
+                <AvatarFallback>{userInitials}</AvatarFallback>
+              </Avatar>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </Button>
+          )}
         </nav>
       </header>
       
