@@ -99,7 +99,7 @@ const Contact = () => {
                   <Mail className="w-5 h-5 text-dashboard-accent1 mt-0.5" />
                   <div>
                     <h3 className="font-medium">Email</h3>
-                    <p className="text-dashboard-muted">support@tasktracker.com</p>
+                    <p className="text-dashboard-muted">adithyak3108@gmail.com</p>
                   </div>
                 </div>
                 
@@ -107,7 +107,7 @@ const Contact = () => {
                   <Phone className="w-5 h-5 text-dashboard-accent1 mt-0.5" />
                   <div>
                     <h3 className="font-medium">Phone</h3>
-                    <p className="text-dashboard-muted">+1 (555) 123-4567</p>
+                    <p className="text-dashboard-muted">+91 8667403113</p>
                   </div>
                 </div>
                 
@@ -116,8 +116,8 @@ const Contact = () => {
                   <div>
                     <h3 className="font-medium">Address</h3>
                     <p className="text-dashboard-muted">
-                      123 Productivity Lane<br />
-                      Organization City, OC 12345
+                      59, Subramaniya udaiyar st<br />
+                      ,Teleunguplayam, coimbatore - 39
                     </p>
                   </div>
                 </div>
