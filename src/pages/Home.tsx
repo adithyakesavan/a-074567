@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight, Moon, Sun } from 'lucide-react';
+import { CheckSquare, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/components/ThemeProvider';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
   
   const handleGetStarted = () => {
     // Check if user is logged in
@@ -22,7 +19,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
       <header className="container mx-auto p-6 flex justify-between items-center">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
           <h1 className="text-2xl font-bold">Task Tracker</h1>
         </div>
@@ -33,14 +30,6 @@ const Home = () => {
             onClick={() => navigate('/dashboard')}
           >
             Dashboard
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="text-white hover:text-white/80"
-          >
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
           <Button 
             variant="outline" 

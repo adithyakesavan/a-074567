@@ -42,13 +42,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchResults, setIsLoading }) 
     setIsLoading(true);
 
     try {
+      // Log what's being sent to the function
+      console.log('Sending to task-search:', { query, userId: user.id });
+      
       const { data, error } = await supabase.functions.invoke('task-search', {
         body: { query, userId: user.id },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
 
-      if (data.tasks && Array.isArray(data.tasks)) {
+      console.log('Search response:', data);
+
+      if (data && data.tasks && Array.isArray(data.tasks)) {
         onSearchResults(data.tasks);
         
         if (data.tasks.length === 0) {
@@ -63,6 +71,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchResults, setIsLoading }) 
           });
         }
       } else {
+        console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
       }
     } catch (error: any) {

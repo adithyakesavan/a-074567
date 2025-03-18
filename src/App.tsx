@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

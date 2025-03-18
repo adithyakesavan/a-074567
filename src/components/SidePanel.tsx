@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Settings, Home, Info, LogOut, CheckSquare } from "lucide-react";
+import { LayoutDashboard, Settings, Home, Info, LogOut, CheckSquare, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -44,11 +44,15 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
   const handleMyTasks = () => {
     onTabChange('dashboard');
   };
+
+  const handleViewProfile = () => {
+    navigate('/profile');
+  };
   
   return (
     <div className="h-screen fixed left-0 top-0 w-64 glass-card border-r border-white/10">
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
           <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
           <h2 className="text-xl font-bold">Task Tracker</h2>
         </div>
@@ -83,6 +87,14 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
                 <Settings className="w-4 h-4" />
                 Settings
               </TabsTrigger>
+              <TabsTrigger 
+                value="profile" 
+                className="w-full justify-start gap-2 data-[state=active]:bg-white/10 data-[state=active]:text-white"
+                onClick={handleViewProfile}
+              >
+                <User className="w-4 h-4" />
+                Profile
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           
@@ -97,7 +109,7 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
         
         <div className="mt-auto">
           <h3 className="text-sm uppercase text-dashboard-muted mb-3 px-2">User</h3>
-          <div className="glass-card p-3 mb-4">
+          <div className="glass-card p-3 mb-4 cursor-pointer" onClick={handleViewProfile}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
                 {initials}
