@@ -21,9 +21,10 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        const { count, error } = await supabase
+        // Using direct query instead of .select('*')
+        const { data, error, count } = await supabase
           .from('tasks')
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact' })
           .eq('user', user.id);
         
         if (error) throw error;
