@@ -21,10 +21,10 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        // Using direct query instead of .select('*')
-        const { data, error, count } = await supabase
+        // Using different approach to query tasks
+        const { count, error } = await supabase
           .from('tasks')
-          .select('*', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .eq('user', user.id);
         
         if (error) throw error;
@@ -48,6 +48,11 @@ const Profile = () => {
     navigate('/login');
     return null;
   }
+
+  // Navigate to tasks page
+  const handleTaskClick = () => {
+    navigate('/dashboard');
+  };
 
   // Get user initials for avatar
   const userEmail = user.email || '';
@@ -85,11 +90,15 @@ const Profile = () => {
                 <h3 className="text-dashboard-muted mb-1">User ID</h3>
                 <p className="font-mono text-sm truncate" title={user.id}>{user.id}</p>
               </div>
-              <div className="bg-white/5 p-4 rounded-lg">
+              <div 
+                className="bg-white/5 p-4 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                onClick={handleTaskClick}
+              >
                 <h3 className="text-dashboard-muted mb-1">Total Tasks</h3>
                 <p className="text-2xl font-bold">
                   {loading ? '...' : taskCount}
                 </p>
+                <p className="text-xs text-dashboard-accent2 mt-1">Click to view all tasks</p>
               </div>
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
