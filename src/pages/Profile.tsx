@@ -21,22 +21,22 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        // Using a raw query to count tasks
-        const { data, error } = await supabase
-          .rpc('count_user_tasks', { user_id: user.id });
+        // Fetch task count - using a simple query since the function doesn't exist
+        const { count, error } = await supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
         
         if (error) {
-          console.error('Error with RPC:', error);
-          // Fallback to a regular count query if RPC fails
-          const { count: fallbackCount, error: fallbackError } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id);
-          
-          if (fallbackError) throw fallbackError;
-          setTaskCount(fallbackCount || 0);
+          console.error('Error fetching tasks:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to fetch your task count',
+            variant: 'destructive',
+          });
+          setTaskCount(0);
         } else {
-          setTaskCount(data || 0);
+          setTaskCount(count || 0);
         }
       } catch (error) {
         console.error('Error fetching task count:', error);
