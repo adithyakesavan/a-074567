@@ -9,18 +9,7 @@ import SearchBar from './SearchBar';
 import NewTaskForm from './NewTaskForm';
 import { taskService } from '@/services/supabaseService';
 import { useAuth } from '@/context/AuthContext';
-import { v4 as uuidv4 } from 'uuid';
-
-// Define the Task interface
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  due_date: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-  user_id?: string;
-}
+import { Task } from '@/types/database';
 
 // Filter types for task filtering
 type FilterType = 'all' | 'completed' | 'pending';
@@ -50,7 +39,17 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       setIsLoading(true);
       try {
         const fetchedTasks = await taskService.getAllTasks();
-        setTasks(fetchedTasks);
+        const formattedTasks: Task[] = fetchedTasks.map((task: any) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          user_id: task.user_id,
+          due_date: task.due_date,
+          priority: task.priority as 'low' | 'medium' | 'high',
+          completed: task.completed,
+          created_at: task.created_at
+        }));
+        setTasks(formattedTasks);
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
         toast({
@@ -152,7 +151,13 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (updatedTask) {
       setTasks(tasks.map(task => 
         task.id === taskId 
-          ? { ...task, ...editForm as Task } 
+          ? { 
+              ...task, 
+              title: editForm.title!,
+              description: editForm.description!,
+              due_date: editForm.due_date!,
+              priority: editForm.priority as 'low' | 'medium' | 'high'
+            } 
           : task
       ));
       
@@ -171,20 +176,27 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (!user) return;
     
     const taskToCreate = {
-      ...newTask,
+      title: newTask.title,
+      description: newTask.description,
+      due_date: newTask.due_date,
+      priority: newTask.priority,
       user_id: user.id,
     };
     
-    const createdTask = await taskService.createTask({
-      title: taskToCreate.title,
-      description: taskToCreate.description,
-      due_date: taskToCreate.due_date,
-      priority: taskToCreate.priority,
-      user_id: user.id,
-    });
+    const createdTask = await taskService.createTask(taskToCreate);
     
     if (createdTask) {
-      setTasks([...tasks, createdTask as Task]);
+      const formattedTask: Task = {
+        id: createdTask.id,
+        title: createdTask.title,
+        description: createdTask.description,
+        user_id: createdTask.user_id,
+        due_date: createdTask.due_date,
+        priority: createdTask.priority as 'low' | 'medium' | 'high',
+        completed: createdTask.completed
+      };
+      
+      setTasks([...tasks, formattedTask]);
       
       toast({
         title: "Task created",

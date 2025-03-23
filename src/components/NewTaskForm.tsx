@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Task } from './TaskList';
+import { Task } from '@/types/database';
+import { useAuth } from '@/context/AuthContext';
 
 interface NewTaskFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onTaskCreate: (task: Task) => void;
+  onTaskCreate: (task: Omit<Task, 'id' | 'user_id'>) => void;
 }
 
 const NewTaskForm = ({ open, onOpenChange, onTaskCreate }: NewTaskFormProps) => {
@@ -20,6 +21,7 @@ const NewTaskForm = ({ open, onOpenChange, onTaskCreate }: NewTaskFormProps) => 
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +35,11 @@ const NewTaskForm = ({ open, onOpenChange, onTaskCreate }: NewTaskFormProps) => 
       return;
     }
     
-    // Create a new task with a random ID
-    const newTask: Task = {
-      id: Math.random().toString(36).substring(2, 11),
+    // Create a new task with the correct field names
+    const newTask = {
       title,
       description,
-      dueDate,
+      due_date: dueDate,
       priority,
       completed: false
     };

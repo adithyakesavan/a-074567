@@ -2,10 +2,10 @@
 export interface Task {
   id: string;
   title: string;
-  description: string;
-  user: string;  // User ID from auth.users
-  dueDate: string;
+  description: string | null;
+  user_id: string;
+  due_date: string;
   priority: 'low' | 'medium' | 'high';
   completed: boolean;
-  createdAt: string;
+  created_at?: string;
 }
