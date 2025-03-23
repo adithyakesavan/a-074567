@@ -21,24 +21,14 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        
-        // Fetch task count directly from the tasks table
-        const { count, error } = await supabase
+        // Using direct query instead of .select('*')
+        const { data, error, count } = await supabase
           .from('tasks')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+          .select('*', { count: 'exact' })
+          .eq('user', user.id);
         
-        if (error) {
-          console.error('Error fetching tasks:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to fetch your task count',
-            variant: 'destructive',
-          });
-          setTaskCount(0);
-        } else {
-          setTaskCount(count || 0);
-        }
+        if (error) throw error;
+        setTaskCount(count || 0);
       } catch (error) {
         console.error('Error fetching task count:', error);
         toast({
@@ -58,11 +48,6 @@ const Profile = () => {
     navigate('/login');
     return null;
   }
-
-  // Navigate to tasks page
-  const handleTaskClick = () => {
-    navigate('/dashboard');
-  };
 
   // Get user initials for avatar
   const userEmail = user.email || '';
@@ -100,15 +85,11 @@ const Profile = () => {
                 <h3 className="text-dashboard-muted mb-1">User ID</h3>
                 <p className="font-mono text-sm truncate" title={user.id}>{user.id}</p>
               </div>
-              <div 
-                className="bg-white/5 p-4 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                onClick={handleTaskClick}
-              >
+              <div className="bg-white/5 p-4 rounded-lg">
                 <h3 className="text-dashboard-muted mb-1">Total Tasks</h3>
                 <p className="text-2xl font-bold">
                   {loading ? '...' : taskCount}
                 </p>
-                <p className="text-xs text-dashboard-accent2 mt-1">Click to view all tasks</p>
               </div>
             </div>
             <div className="bg-white/5 p-4 rounded-lg">
