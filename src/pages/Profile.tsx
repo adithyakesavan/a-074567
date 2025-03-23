@@ -21,7 +21,8 @@ const Profile = () => {
       
       try {
         setLoading(true);
-        // Fetch task count - using a simple query since the function doesn't exist
+        
+        // Fetch task count directly from the tasks table
         const { count, error } = await supabase
           .from('tasks')
           .select('*', { count: 'exact', head: true })
