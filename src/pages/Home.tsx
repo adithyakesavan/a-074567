@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare, ArrowRight } from 'lucide-react';
@@ -31,13 +30,6 @@ const Home = () => {
             onClick={() => navigate('/dashboard')}
           >
             Dashboard
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:text-white/80"
-            onClick={() => navigate('/contact')}
-          >
-            Contact
           </Button>
           <Button 
             variant="outline" 
@@ -91,17 +83,8 @@ const Home = () => {
       </main>
       
       <footer className="container mx-auto p-6 border-t border-white/10 mt-20">
-        <div className="flex justify-between items-center">
-          <p className="text-gray-400">Copyrights 2025. Reserved</p>
-          <div className="flex gap-4">
-            <Button 
-              variant="ghost" 
-              className="text-gray-400 hover:text-white"
-              onClick={() => navigate('/contact')}
-            >
-              Contact Us
-            </Button>
-          </div>
+        <div className="text-center text-gray-400">
+          <p>Copyrights 2025. Reserved</p>
         </div>
       </footer>
     </div>
