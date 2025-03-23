@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Task } from './TaskList';
+import { Task } from '@/types/database';
 
 interface SearchBarProps {
   onSearchResults: (tasks: Task[]) => void;
