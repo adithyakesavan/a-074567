@@ -39,7 +39,7 @@ const NewTaskForm = ({ open, onOpenChange, onTaskCreate }: NewTaskFormProps) => 
     const newTask = {
       title,
       description,
-      due_date: dueDate,
+      due_date: dueDate, // Use due_date to match the Task interface
       priority,
       completed: false
     };
