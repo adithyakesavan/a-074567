@@ -108,7 +108,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium">Email</h3>
-                    <p className="text-gray-300">support@tasktracker.com</p>
+                    <p className="text-gray-300">adithyak3108@gmail.com</p>
                   </div>
                 </div>
                 
@@ -118,7 +118,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium">Phone</h3>
-                    <p className="text-gray-300">+1 (555) 123-4567</p>
+                    <p className="text-gray-300">+91 8667403113</p>
                   </div>
                 </div>
                 
@@ -128,8 +128,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-medium">Address</h3>
-                    <p className="text-gray-300">123 Productivity Lane, Suite 405</p>
-                    <p className="text-gray-300">San Francisco, CA 94107</p>
+                    <p className="text-gray-300">59,Subramaniya Udaiyar st,</p>
+                    <p className="text-gray-300">Telunguplayam,coimbatore</p>
                   </div>
                 </div>
               </div>
