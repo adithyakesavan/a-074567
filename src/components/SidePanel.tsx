@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Settings, Users, Home, Info, Mail, LogOut, CheckSquare, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Settings, Home, Info, Mail, LogOut, CheckSquare, Lightbulb, BarChart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
@@ -34,18 +34,18 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
     navigate('/');
   };
   
-  const handleMyTasks = () => {
-    onTabChange('dashboard');
+  const handlePerformance = () => {
+    navigate('/performance');
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const handleLogoClick = () => {
+    navigate('/');
   };
   
   return (
     <div className="h-screen fixed left-0 top-0 w-64 glass-card border-r border-white/10">
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={handleLogoClick}>
           <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
           <h2 className="text-xl font-bold">Task Tracker</h2>
         </div>
@@ -67,13 +67,6 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
                 Dashboard
               </TabsTrigger>
               <TabsTrigger 
-                value="users" 
-                className="w-full justify-start gap-2 data-[state=active]:bg-white/10 data-[state=active]:text-white"
-              >
-                <Users className="w-4 h-4" />
-                Users
-              </TabsTrigger>
-              <TabsTrigger 
                 value="settings" 
                 className="w-full justify-start gap-2 data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
@@ -93,25 +86,33 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
           
           <button 
             className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors"
-            onClick={toggleTheme}
+            onClick={() => navigate('/about')}
           >
-            {theme === "light" ? (
-              <>
-                <Moon className="w-4 h-4" />
-                Dark Mode
-              </>
-            ) : (
-              <>
-                <Sun className="w-4 h-4" />
-                Light Mode
-              </>
-            )}
+            <Info className="w-4 h-4" />
+            About
           </button>
+          
+          <button 
+            className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors"
+            onClick={() => navigate('/contact')}
+          >
+            <Mail className="w-4 h-4" />
+            Contact
+          </button>
+          
+          <div 
+            className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing"
+            draggable
+            onDragEnd={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            <Lightbulb className="w-4 h-4 text-yellow-300" />
+            Toggle Theme
+          </div>
         </div>
         
         <div className="mt-auto">
           <h3 className="text-sm uppercase text-dashboard-muted mb-3 px-2">User</h3>
-          <div className="glass-card p-3 mb-4">
+          <div className="glass-card p-3 mb-4 cursor-pointer" onClick={() => navigate('/profile')}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
                 {initials}
@@ -126,10 +127,10 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
           <div className="flex flex-col gap-1">
             <button 
               className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
-              onClick={handleMyTasks}
+              onClick={handlePerformance}
             >
-              <CheckSquare className="w-4 h-4 text-dashboard-accent3" />
-              <span>My Tasks</span>
+              <BarChart className="w-4 h-4 text-dashboard-accent3" />
+              <span>My Performance</span>
             </button>
             <button 
               className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400"

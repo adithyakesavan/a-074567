@@ -1,17 +1,20 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight, Moon, Sun } from 'lucide-react';
+import { CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/ThemeProvider';
 
 const Home = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userEmail = localStorage.getItem('userEmail') || '';
+  const initials = userEmail ? userEmail.split('@')[0].charAt(0).toUpperCase() + 
+                  (userEmail.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '') : '';
   
   const handleGetStarted = () => {
     // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (isLoggedIn) {
       navigate('/dashboard');
     } else {
@@ -22,7 +25,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
       <header className="container mx-auto p-6 flex justify-between items-center">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
           <h1 className="text-2xl font-bold">Task Tracker</h1>
         </div>
@@ -34,21 +37,46 @@ const Home = () => {
           >
             Dashboard
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          <Button 
+            variant="ghost" 
             className="text-white hover:text-white/80"
+            onClick={() => navigate('/about')}
           >
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            About
           </Button>
           <Button 
-            variant="outline" 
-            className="border-white/20 text-white hover:bg-white/10"
-            onClick={() => navigate('/login')}
+            variant="ghost" 
+            className="text-white hover:text-white/80"
+            onClick={() => navigate('/contact')}
           >
-            Login
+            Contact
           </Button>
+          <div 
+            className="cursor-grab active:cursor-grabbing"
+            draggable
+            onDragEnd={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            <Lightbulb className="h-5 w-5 text-yellow-300" />
+          </div>
+          {!isLoggedIn ? (
+            <Button 
+              variant="outline" 
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </Button>
+          ) : (
+            <div 
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => navigate('/profile')}
+            >
+              <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
+                {initials}
+              </div>
+              <span>{userEmail.split('@')[0].replace('.', ' ')}</span>
+            </div>
+          )}
         </nav>
       </header>
       

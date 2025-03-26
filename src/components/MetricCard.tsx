@@ -21,7 +21,7 @@ const MetricCard = ({ title, value, total = 100, color, onClick }: MetricCardPro
       className="metric-card cursor-pointer hover:scale-105 transition-transform" 
       onClick={onClick}
     >
-      <div className="relative w-32 h-32 mb-4">
+      <div className="relative w-32 h-32 mb-6">
         <CircularProgressbar
           value={percentage}
           text={`${value}`}
@@ -30,10 +30,12 @@ const MetricCard = ({ title, value, total = 100, color, onClick }: MetricCardPro
             textColor: color,
             pathColor: color,
             trailColor: 'rgba(255,255,255,0.1)',
+            // Add more spacing between the circle and the value
+            pathTransitionDuration: 0.5,
           })}
         />
         {total > 0 && (
-          <div className="absolute -bottom-2 left-0 right-0 text-xs text-center text-dashboard-muted">
+          <div className="absolute -bottom-4 left-0 right-0 text-xs text-center text-dashboard-muted">
             of {total} total
           </div>
         )}
