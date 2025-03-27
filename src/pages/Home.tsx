@@ -93,7 +93,7 @@ const Home = () => {
               className="bg-black hover:bg-black/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
               onClick={handleGetStarted}
             >
-              Get Started
+              <span className="text-yellow-300">Get Started</span>
               <ArrowRight className="ml-2" />
             </Button>
           </div>
