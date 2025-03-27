@@ -144,3 +144,8 @@ body {
 :root:not(.dark) .text-muted-foreground {
   color: #555555;
 }
+
+/* Keep the yellow color for "Get Started" text in light mode */
+:root:not(.dark) .text-yellow-400 {
+  color: #FACC15 !important; 
+}

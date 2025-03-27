@@ -1,12 +1,19 @@
+
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
-  Shield, Moon, CheckCircle, Clock, ListTodo 
+  Shield, CheckCircle, Clock, ListTodo 
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import MetricCard from '@/components/MetricCard';
-import MonthlyChart from '@/components/MonthlyChart';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
@@ -15,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [language, setLanguage] = useState('en');
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -41,6 +49,14 @@ const Index = () => {
     toast({
       title: `${type} notifications enabled`,
       description: "You'll receive notifications for your tasks",
+    });
+  };
+
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    toast({
+      title: "Language changed",
+      description: `Interface language set to ${value === 'en' ? 'English' : value === 'es' ? 'Spanish' : 'French'}`,
     });
   };
 
@@ -196,33 +212,32 @@ const Index = () => {
                       <p className="font-medium">Language</p>
                       <p className="text-sm text-gray-400">Select your language</p>
                     </div>
-                    <select className="bg-transparent border border-white/10 rounded-md px-2 py-1">
-                      <option value="en">English</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Dark Mode</p>
-                      <p className="text-sm text-gray-400">Toggle dark mode</p>
-                    </div>
-                    <Switch defaultChecked />
+                    <Select defaultValue={language} onValueChange={handleLanguageChange}>
+                      <SelectTrigger className="w-32 bg-transparent border border-white/10">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Default Task View</p>
                       <p className="text-sm text-gray-400">Choose default task filter</p>
                     </div>
-                    <select 
-                      className="bg-transparent border border-white/10 rounded-md px-2 py-1"
-                      onChange={(e) => setTaskFilter(e.target.value as any)}
-                      value={taskFilter}
-                    >
-                      <option value="all">All Tasks</option>
-                      <option value="pending">Pending Only</option>
-                      <option value="completed">Completed Only</option>
-                    </select>
+                    <Select defaultValue={taskFilter} onValueChange={(value: string) => setTaskFilter(value as any)}>
+                      <SelectTrigger className="w-32 bg-transparent border border-white/10">
+                        <SelectValue placeholder="Select view" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Tasks</SelectItem>
+                        <SelectItem value="pending">Pending Only</SelectItem>
+                        <SelectItem value="completed">Completed Only</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

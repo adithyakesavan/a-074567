@@ -4,6 +4,13 @@ import { LayoutDashboard, Settings, Home, Info, Mail, LogOut, CheckSquare, Light
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
+import { 
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface SidePanelProps {
   onTabChange: (value: string) => void;
@@ -116,41 +123,50 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
         
         <div className="mt-auto">
           <h3 className="text-sm uppercase text-dashboard-muted mb-3 px-2">User</h3>
-          <div className="glass-card p-3 mb-4 cursor-pointer" onClick={handleProfile}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                {initials}
-              </div>
-              <div>
-                <p className="font-medium">{userEmail.split('@')[0].replace('.', ' ')}</p>
-                <p className="text-xs text-dashboard-muted">{userEmail}</p>
-              </div>
-            </div>
-          </div>
           
-          <div className="flex flex-col gap-1">
-            <button 
-              className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
-              onClick={handleProfile}
-            >
-              <User className="w-4 h-4 text-dashboard-accent1" />
-              <span>My Profile</span>
-            </button>
-            <button 
-              className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
-              onClick={handlePerformance}
-            >
-              <BarChart className="w-4 h-4 text-dashboard-accent3" />
-              <span>My Performance</span>
-            </button>
-            <button 
-              className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400"
-              onClick={handleSignOut}
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
-            </button>
-          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="glass-card p-3 mb-4 cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
+                    {initials}
+                  </div>
+                  <div>
+                    <p className="font-medium">{userEmail.split('@')[0].replace('.', ' ')}</p>
+                    <p className="text-xs text-dashboard-muted">{userEmail}</p>
+                  </div>
+                </div>
+              </div>
+            </SheetTrigger>
+            <SheetContent className="glass-card border-white/10">
+              <SheetHeader>
+                <SheetTitle className="text-center">Profile Options</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 flex flex-col gap-2">
+                <button 
+                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
+                  onClick={handleProfile}
+                >
+                  <User className="w-4 h-4 text-dashboard-accent1" />
+                  <span>My Profile</span>
+                </button>
+                <button 
+                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
+                  onClick={handlePerformance}
+                >
+                  <BarChart className="w-4 h-4 text-dashboard-accent3" />
+                  <span>My Performance</span>
+                </button>
+                <button 
+                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </div>

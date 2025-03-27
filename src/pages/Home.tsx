@@ -1,13 +1,23 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/ThemeProvider';
+import { 
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { BarChart, LogOut } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Home = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const userEmail = localStorage.getItem('userEmail') || '';
   const initials = userEmail ? userEmail.split('@')[0].charAt(0).toUpperCase() + 
@@ -20,6 +30,26 @@ const Home = () => {
     } else {
       navigate('/login');
     }
+  };
+
+  const handleSignOut = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('token');
+    
+    // Show toast notification
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully",
+    });
+    
+    // Navigate to home page
+    navigate('/');
+  };
+  
+  const handlePerformance = () => {
+    navigate('/performance');
   };
 
   return (
@@ -67,15 +97,53 @@ const Home = () => {
               Login
             </Button>
           ) : (
-            <div 
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => navigate('/profile')}
-            >
-              <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                {initials}
-              </div>
-              <span>{userEmail.split('@')[0].replace('.', ' ')}</span>
-            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
+                    {initials}
+                  </div>
+                  <span>{userEmail.split('@')[0].replace('.', ' ')}</span>
+                </div>
+              </SheetTrigger>
+              <SheetContent className="glass-card border-white/10">
+                <SheetHeader>
+                  <SheetTitle className="text-center">Profile Options</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 flex flex-col gap-2">
+                  <Button 
+                    variant="ghost" 
+                    className="flex justify-start items-center gap-2"
+                    onClick={() => {
+                      navigate('/profile');
+                    }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
+                      {initials}
+                    </div>
+                    <span>View Profile</span>
+                  </Button>
+
+                  <Button 
+                    variant="ghost" 
+                    className="flex justify-start items-center gap-2"
+                    onClick={handlePerformance}
+                  >
+                    <BarChart className="w-5 h-5 text-dashboard-accent3" />
+                    <span>Performance</span>
+                  </Button>
+
+                  <Button 
+                    variant="ghost" 
+                    className="flex justify-start items-center gap-2 text-red-400"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Sign Out</span>
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
         </nav>
       </header>
@@ -93,7 +161,7 @@ const Home = () => {
               className="bg-black hover:bg-black/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
               onClick={handleGetStarted}
             >
-              <span className="text-yellow-300">Get Started</span>
+              <span className="text-yellow-400">Get Started</span>
               <ArrowRight className="ml-2" />
             </Button>
           </div>
