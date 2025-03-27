@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Home, Mail, LogOut, BarChart } from 'lucide-react';
+import { CheckSquare, Home, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,33 +50,6 @@ const Login = () => {
     });
     
     navigate('/dashboard');
-  };
-
-  const handleSignOut = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('token');
-    
-    // Show toast notification
-    toast({
-      title: "Signed out",
-      description: "You have been signed out successfully",
-    });
-  };
-  
-  const handlePerformance = () => {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (isLoggedIn) {
-      navigate('/performance');
-    } else {
-      toast({
-        title: "Not logged in",
-        description: "Please log in to view your performance",
-        variant: "destructive",
-      });
-    }
   };
   
   return (
@@ -152,28 +125,6 @@ const Login = () => {
           </svg>
           Sign in with Google
         </Button>
-        
-        <div className="mt-6 flex justify-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-2 border-white/20 hover:bg-white/10"
-            onClick={handlePerformance}
-          >
-            <BarChart className="w-4 h-4 text-dashboard-accent3" />
-            Performance
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-2 border-white/20 hover:bg-white/10 text-red-400"
-            onClick={handleSignOut}
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </Button>
-        </div>
         
         <div className="mt-6 text-center">
           <p className="text-gray-400">

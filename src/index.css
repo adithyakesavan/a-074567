@@ -110,11 +110,6 @@ body {
   color: black;
 }
 
-/* Keep the "Get Started" text yellow even in light mode */
-:root:not(.dark) .text-yellow-300 {
-  color: #FCD34D !important;
-}
-
 /* Ensure text in inputs is black in light mode */
 :root:not(.dark) input,
 :root:not(.dark) select,
@@ -149,4 +144,3 @@ body {
 :root:not(.dark) .text-muted-foreground {
   color: #555555;
 }
-
