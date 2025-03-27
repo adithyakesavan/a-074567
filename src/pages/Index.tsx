@@ -1,7 +1,7 @@
 
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
-  Shield, CheckCircle, Clock, ListTodo 
+  Shield, CheckCircle, Clock, ListTodo, User, BarChart, LogOut
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -54,9 +54,15 @@ const Index = () => {
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
+    localStorage.setItem('language', value);
+    
+    let languageName = 'English';
+    if (value === 'es') languageName = 'Spanish';
+    if (value === 'fr') languageName = 'French';
+    
     toast({
       title: "Language changed",
-      description: `Interface language set to ${value === 'en' ? 'English' : value === 'es' ? 'Spanish' : 'French'}`,
+      description: `Interface language set to ${languageName}`,
     });
   };
 
@@ -66,27 +72,41 @@ const Index = () => {
         return (
           <>
             <header className="mb-8">
-              <h1 className="text-3xl font-medium mb-2">Task Tracker Dashboard</h1>
-              <p className="text-dashboard-muted">Manage your tasks efficiently and stay on top of your deadlines</p>
+              <h1 className="text-3xl font-medium mb-2">
+                {language === 'en' ? 'Task Tracker Dashboard' : 
+                 language === 'es' ? 'Panel de Control de Tareas' : 
+                 'Tableau de Bord des Tâches'}
+              </h1>
+              <p className="text-dashboard-muted">
+                {language === 'en' ? 'Manage your tasks efficiently and stay on top of your deadlines' : 
+                 language === 'es' ? 'Administre sus tareas de manera eficiente y cumpla con sus fechas límite' : 
+                 'Gérez vos tâches efficacement et respectez vos délais'}
+              </p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
-                title="Total Tasks"
+                title={language === 'en' ? 'Total Tasks' : 
+                      language === 'es' ? 'Tareas Totales' : 
+                      'Tâches Totales'}
                 value={24}
                 total={24}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
-                title="Completed"
+                title={language === 'en' ? 'Completed' : 
+                      language === 'es' ? 'Completadas' : 
+                      'Terminées'}
                 value={8}
                 total={24}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
-                title="Pending"
+                title={language === 'en' ? 'Pending' : 
+                      language === 'es' ? 'Pendientes' : 
+                      'En Attente'}
                 value={16}
                 total={24}
                 color="#8989DE"
@@ -101,14 +121,26 @@ const Index = () => {
         return (
           <>
             <header className="mb-8">
-              <h1 className="text-3xl font-medium mb-2">Users</h1>
-              <p className="text-dashboard-muted">Manage your users and their permissions</p>
+              <h1 className="text-3xl font-medium mb-2">
+                {language === 'en' ? 'Users' : 
+                 language === 'es' ? 'Usuarios' : 
+                 'Utilisateurs'}
+              </h1>
+              <p className="text-dashboard-muted">
+                {language === 'en' ? 'Manage your users and their permissions' : 
+                 language === 'es' ? 'Administre sus usuarios y sus permisos' : 
+                 'Gérez vos utilisateurs et leurs permissions'}
+              </p>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="dashboard-card">
                 <div className="flex items-center gap-3 mb-4">
                   <UserPlus className="w-5 h-5 text-blue-400" />
-                  <h2 className="text-xl font-medium">Active Users</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'en' ? 'Active Users' : 
+                     language === 'es' ? 'Usuarios Activos' : 
+                     'Utilisateurs Actifs'}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 glass-card">
@@ -116,12 +148,20 @@ const Index = () => {
                       <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">JD</div>
                       <div>
                         <p className="font-medium">John Doe</p>
-                        <p className="text-sm text-gray-400">Administrator</p>
+                        <p className="text-sm text-gray-400">
+                          {language === 'en' ? 'Administrator' : 
+                           language === 'es' ? 'Administrador' : 
+                           'Administrateur'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Key className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-400">Active</span>
+                      <span className="text-sm text-green-400">
+                        {language === 'en' ? 'Active' : 
+                         language === 'es' ? 'Activo' : 
+                         'Actif'}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 glass-card">
@@ -129,12 +169,20 @@ const Index = () => {
                       <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">AS</div>
                       <div>
                         <p className="font-medium">Alice Smith</p>
-                        <p className="text-sm text-gray-400">Editor</p>
+                        <p className="text-sm text-gray-400">
+                          {language === 'en' ? 'Editor' : 
+                           language === 'es' ? 'Editor' : 
+                           'Éditeur'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Key className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-400">Active</span>
+                      <span className="text-sm text-green-400">
+                        {language === 'en' ? 'Active' : 
+                         language === 'es' ? 'Activo' : 
+                         'Actif'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -142,20 +190,40 @@ const Index = () => {
               <div className="dashboard-card">
                 <div className="flex items-center gap-3 mb-4">
                   <Shield className="w-5 h-5 text-purple-400" />
-                  <h2 className="text-xl font-medium">Permissions</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'en' ? 'Permissions' : 
+                     language === 'es' ? 'Permisos' : 
+                     'Permissions'}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 glass-card">
                     <div>
-                      <p className="font-medium">Admin Access</p>
-                      <p className="text-sm text-gray-400">Full system access</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Admin Access' : 
+                         language === 'es' ? 'Acceso de Administrador' : 
+                         'Accès Administrateur'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Full system access' : 
+                         language === 'es' ? 'Acceso completo al sistema' : 
+                         'Accès complet au système'}
+                      </p>
                     </div>
                     <Switch />
                   </div>
                   <div className="flex items-center justify-between p-3 glass-card">
                     <div>
-                      <p className="font-medium">Editor Access</p>
-                      <p className="text-sm text-gray-400">Content management</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Editor Access' : 
+                         language === 'es' ? 'Acceso de Editor' : 
+                         'Accès Éditeur'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Content management' : 
+                         language === 'es' ? 'Gestión de contenido' : 
+                         'Gestion de contenu'}
+                      </p>
                     </div>
                     <Switch />
                   </div>
@@ -168,34 +236,70 @@ const Index = () => {
         return (
           <>
             <header className="mb-8">
-              <h1 className="text-3xl font-medium mb-2">Settings</h1>
-              <p className="text-dashboard-muted">Configure your application settings</p>
+              <h1 className="text-3xl font-medium mb-2">
+                {language === 'en' ? 'Settings' : 
+                 language === 'es' ? 'Configuración' : 
+                 'Paramètres'}
+              </h1>
+              <p className="text-dashboard-muted">
+                {language === 'en' ? 'Configure your application settings' : 
+                 language === 'es' ? 'Configure los ajustes de su aplicación' : 
+                 'Configurez les paramètres de votre application'}
+              </p>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="dashboard-card">
                 <div className="flex items-center gap-3 mb-4">
                   <Bell className="w-5 h-5 text-yellow-400" />
-                  <h2 className="text-xl font-medium">Notifications</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'en' ? 'Notifications' : 
+                     language === 'es' ? 'Notificaciones' : 
+                     'Notifications'}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Email Notifications</p>
-                      <p className="text-sm text-gray-400">Receive task updates via email</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Email Notifications' : 
+                         language === 'es' ? 'Notificaciones por Correo' : 
+                         'Notifications par Email'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Receive task updates via email' : 
+                         language === 'es' ? 'Recibir actualizaciones de tareas por correo' : 
+                         'Recevoir les mises à jour des tâches par email'}
+                      </p>
                     </div>
                     <Switch onCheckedChange={() => handleNotificationToggle('Email')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Due Date Reminders</p>
-                      <p className="text-sm text-gray-400">Get reminders 5 minutes before due date</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Due Date Reminders' : 
+                         language === 'es' ? 'Recordatorios de Fechas Límite' : 
+                         'Rappels de Dates d\'Échéance'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Get reminders 5 minutes before due date' : 
+                         language === 'es' ? 'Recibir recordatorios 5 minutos antes de la fecha límite' : 
+                         'Recevoir des rappels 5 minutes avant la date d\'échéance'}
+                      </p>
                     </div>
                     <Switch onCheckedChange={() => handleNotificationToggle('Due date')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Push Notifications</p>
-                      <p className="text-sm text-gray-400">Receive push notifications</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Push Notifications' : 
+                         language === 'es' ? 'Notificaciones Push' : 
+                         'Notifications Push'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Receive push notifications' : 
+                         language === 'es' ? 'Recibir notificaciones push' : 
+                         'Recevoir des notifications push'}
+                      </p>
                     </div>
                     <Switch onCheckedChange={() => handleNotificationToggle('Push')} />
                   </div>
@@ -204,38 +308,70 @@ const Index = () => {
               <div className="dashboard-card">
                 <div className="flex items-center gap-3 mb-4">
                   <Globe className="w-5 h-5 text-green-400" />
-                  <h2 className="text-xl font-medium">Preferences</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'en' ? 'Preferences' : 
+                     language === 'es' ? 'Preferencias' : 
+                     'Préférences'}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Language</p>
-                      <p className="text-sm text-gray-400">Select your language</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Language' : 
+                         language === 'es' ? 'Idioma' : 
+                         'Langue'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Select your language' : 
+                         language === 'es' ? 'Seleccione su idioma' : 
+                         'Sélectionnez votre langue'}
+                      </p>
                     </div>
-                    <Select defaultValue={language} onValueChange={handleLanguageChange}>
+                    <Select value={language} onValueChange={handleLanguageChange}>
                       <SelectTrigger className="w-32 bg-transparent border border-white/10">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">Default Task View</p>
-                      <p className="text-sm text-gray-400">Choose default task filter</p>
+                      <p className="font-medium">
+                        {language === 'en' ? 'Default Task View' : 
+                         language === 'es' ? 'Vista Predeterminada de Tareas' : 
+                         'Vue par Défaut des Tâches'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {language === 'en' ? 'Choose default task filter' : 
+                         language === 'es' ? 'Elija el filtro predeterminado de tareas' : 
+                         'Choisissez le filtre par défaut des tâches'}
+                      </p>
                     </div>
-                    <Select defaultValue={taskFilter} onValueChange={(value: string) => setTaskFilter(value as any)}>
+                    <Select value={taskFilter} onValueChange={(value: string) => setTaskFilter(value as any)}>
                       <SelectTrigger className="w-32 bg-transparent border border-white/10">
                         <SelectValue placeholder="Select view" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Tasks</SelectItem>
-                        <SelectItem value="pending">Pending Only</SelectItem>
-                        <SelectItem value="completed">Completed Only</SelectItem>
+                        <SelectItem value="all">
+                          {language === 'en' ? 'All Tasks' : 
+                           language === 'es' ? 'Todas las Tareas' : 
+                           'Toutes les Tâches'}
+                        </SelectItem>
+                        <SelectItem value="pending">
+                          {language === 'en' ? 'Pending Only' : 
+                           language === 'es' ? 'Solo Pendientes' : 
+                           'En Attente Seulement'}
+                        </SelectItem>
+                        <SelectItem value="completed">
+                          {language === 'en' ? 'Completed Only' : 
+                           language === 'es' ? 'Solo Completadas' : 
+                           'Terminées Seulement'}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

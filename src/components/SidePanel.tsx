@@ -22,14 +22,16 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
   const { theme, setTheme } = useTheme();
   
   const userEmail = localStorage.getItem('userEmail') || 'john.smith@example.com';
-  const initials = userEmail.split('@')[0].charAt(0).toUpperCase() + 
-                  (userEmail.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '');
+  const userName = localStorage.getItem('userName') || userEmail.split('@')[0].replace('.', ' ');
+  const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('');
   
   const handleSignOut = () => {
     // Clear user data from localStorage
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
     localStorage.removeItem('token');
+    localStorage.removeItem('language');
     
     // Show toast notification
     toast({
@@ -132,7 +134,7 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
                     {initials}
                   </div>
                   <div>
-                    <p className="font-medium">{userEmail.split('@')[0].replace('.', ' ')}</p>
+                    <p className="font-medium">{userName}</p>
                     <p className="text-xs text-dashboard-muted">{userEmail}</p>
                   </div>
                 </div>

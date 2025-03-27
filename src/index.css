@@ -146,6 +146,13 @@ body {
 }
 
 /* Keep the yellow color for "Get Started" text in light mode */
-:root:not(.dark) .text-yellow-400 {
+:root:not(.dark) .text-yellow-400,
+:root:not(.dark) .text-yellow-300 {
   color: #FACC15 !important; 
+}
+
+/* Make sure the yellow color is preserved even for explicitly defined elements */
+.text-yellow-400,
+.text-yellow-300 {
+  color: #FACC15 !important;
 }
