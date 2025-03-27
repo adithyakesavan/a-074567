@@ -136,7 +136,7 @@ const Contact = () => {
             </div>
             
             <div className="glass-card p-8">
-              <h2 className="text-2xl font-semibold mb-6">Send a Message</h2>
+              <h2 className="text-2xl font-semibold mb-6">Send a Feedback</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
@@ -189,7 +189,7 @@ const Contact = () => {
                 
                 <Button type="submit" className="w-full bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
                   <Send className="w-4 h-4 mr-2" />
-                  Send Message
+                  Send 
                 </Button>
               </form>
             </div>
