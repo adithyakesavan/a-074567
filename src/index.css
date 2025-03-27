@@ -156,3 +156,8 @@ body {
 .text-yellow-300 {
   color: #FACC15 !important;
 }
+
+/* Get Started text special styling for light mode */
+:root:not(.dark) span.text-yellow-400 {
+  color: #FACC15 !important;
+}

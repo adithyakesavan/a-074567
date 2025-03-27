@@ -1,28 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Lightbulb, User, Mail, Save, ArrowLeft, BarChart, LogOut } from 'lucide-react';
+import { CheckSquare, Lightbulb, User, Mail, Save, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTheme } from '@/components/ThemeProvider';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { LanguageContext, triggerLanguageChange } from '../App';
+import UserProfileMenu from '@/components/UserProfileMenu';
 
 const UserProfile = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { language } = useContext(LanguageContext);
   
   const userEmail = localStorage.getItem('userEmail') || 'john.smith@example.com';
   const storedUserName = localStorage.getItem('userName');
   const [userName, setUserName] = useState(storedUserName || userEmail.split('@')[0].replace('.', ' '));
-  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
   
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(userName);
@@ -39,6 +34,9 @@ const UserProfile = () => {
     localStorage.setItem('userName', editedName);
     setUserName(editedName);
     
+    // Trigger a storage event to notify other components
+    window.dispatchEvent(new Event('storage'));
+    
     toast({
       title: language === 'en' ? "Profile updated" : 
              language === 'es' ? "Perfil actualizado" : 
@@ -48,32 +46,6 @@ const UserProfile = () => {
                    "Vos informations de profil ont été mises à jour avec succès.",
     });
     setIsEditing(false);
-  };
-  
-  const handleSignOut = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('token');
-    localStorage.removeItem('language');
-    
-    // Show toast notification
-    toast({
-      title: language === 'en' ? "Signed out" : 
-             language === 'es' ? "Sesión cerrada" : 
-             "Déconnecté",
-      description: language === 'en' ? "You have been signed out successfully" : 
-                   language === 'es' ? "Ha cerrado sesión con éxito" : 
-                   "Vous avez été déconnecté avec succès",
-    });
-    
-    // Navigate to home page
-    navigate('/');
-  };
-  
-  const handlePerformance = () => {
-    navigate('/performance');
   };
 
   const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('');
@@ -125,60 +97,7 @@ const UserProfile = () => {
             <Lightbulb className="h-5 w-5 text-yellow-300" />
           </div>
           
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="flex items-center gap-2 cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                  {initials}
-                </div>
-                <span>{userName}</span>
-              </div>
-            </SheetTrigger>
-            <SheetContent className="glass-card border-white/10">
-              <SheetHeader>
-                <SheetTitle className="text-center">
-                  {language === 'en' ? 'Profile Options' : 
-                   language === 'es' ? 'Opciones de Perfil' : 
-                   'Options de Profil'}
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 flex flex-col gap-2">
-                <button 
-                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
-                  onClick={() => navigate('/profile')}
-                >
-                  <User className="w-4 h-4 text-dashboard-accent1" />
-                  <span>
-                    {language === 'en' ? 'My Profile' : 
-                     language === 'es' ? 'Mi Perfil' : 
-                     'Mon Profil'}
-                  </span>
-                </button>
-                <button 
-                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
-                  onClick={handlePerformance}
-                >
-                  <BarChart className="w-4 h-4 text-dashboard-accent3" />
-                  <span>
-                    {language === 'en' ? 'My Performance' : 
-                     language === 'es' ? 'Mi Rendimiento' : 
-                     'Mes Performances'}
-                  </span>
-                </button>
-                <button 
-                  className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>
-                    {language === 'en' ? 'Sign Out' : 
-                     language === 'es' ? 'Cerrar Sesión' : 
-                     'Déconnexion'}
-                  </span>
-                </button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <UserProfileMenu />
         </nav>
       </header>
       
