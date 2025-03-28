@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import UserProfile from "./pages/UserProfile";
 import Performance from "./pages/Performance";
+import { AuthProvider } from './contexts/AuthContext';
 
 // Create a language context
 export const LanguageContext = createContext({
@@ -71,21 +71,23 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="task-tracker-theme">
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/performance" element={<Performance />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/dashboard" element={<Index />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                  <Route path="/performance" element={<Performance />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
