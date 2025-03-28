@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -50,10 +51,12 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('tasks')
         .select('*')
         .order('created_at', { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -127,6 +130,24 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  // Handle edit click
+  const handleEditClick = (task: Task) => {
+    setEditingTask(task.id);
+    setEditForm({
+      title: task.title,
+      description: task.description,
+      due_date: task.due_date,
+      priority: task.priority,
+      completed: task.completed,
+    });
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingTask(null);
+    setEditForm({});
   };
 
   // Handle save edit
@@ -410,7 +431,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-red-500 hover:text-red-600"
-                          onClick={handleCancelEdit}
+                          onClick={() => handleCancelEdit()}
                         >
                           <X className="h-4 w-4" />
                         </Button>
