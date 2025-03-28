@@ -1,166 +1,106 @@
 
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
+import React from 'react';
+import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/components/ThemeProvider';
-import { LanguageContext } from '../App';
-import UserProfileMenu from '@/components/UserProfileMenu';
-import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { CheckCircle } from 'lucide-react';
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-  const { language } = useContext(LanguageContext);
-  const { toast } = useToast();
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  
-  const handleGetStarted = () => {
-    // Check if user is logged in
-    if (isLoggedIn) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      <header className="container mx-auto p-6 flex justify-between items-center">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
-          <h1 className="text-2xl font-bold">
-            {language === 'en' ? 'Task Tracker' : 
-             language === 'es' ? 'Seguimiento de Tareas' : 
-             'Suivi des Tâches'}
-          </h1>
-        </div>
-        <nav className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            className="text-white hover:text-white/80"
-            onClick={() => navigate('/dashboard')}
-          >
-            {language === 'en' ? 'Dashboard' : 
-             language === 'es' ? 'Panel' : 
-             'Tableau de Bord'}
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:text-white/80"
-            onClick={() => navigate('/about')}
-          >
-            {language === 'en' ? 'About' : 
-             language === 'es' ? 'Acerca de' : 
-             'À Propos'}
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:text-white/80"
-            onClick={() => navigate('/contact')}
-          >
-            {language === 'en' ? 'Contact' : 
-             language === 'es' ? 'Contacto' : 
-             'Contact'}
-          </Button>
-          <div 
-            className="cursor-grab active:cursor-grabbing"
-            draggable
-            onDragEnd={() => setTheme(theme === "light" ? "dark" : "light")}
-          >
-            <Lightbulb className="h-5 w-5 text-yellow-300" />
-          </div>
-          {!isLoggedIn ? (
-            <Button 
-              variant="outline" 
-              className="border-white/20 text-white hover:bg-white/10"
-              onClick={() => navigate('/login')}
-            >
-              {language === 'en' ? 'Login' : 
-               language === 'es' ? 'Iniciar Sesión' : 
-               'Connexion'}
-            </Button>
-          ) : (
-            <UserProfileMenu />
-          )}
-        </nav>
-      </header>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
       
-      <main className="container mx-auto px-6 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            {language === 'en' ? 'Manage Your Tasks Efficiently' : 
-             language === 'es' ? 'Administre sus Tareas Eficientemente' : 
-             'Gérez vos Tâches Efficacement'}
-          </h1>
-          <p className="text-xl text-gray-300 mb-12">
-            {language === 'en' ? 'A powerful task management tool that helps you stay organized, focused, and productive. Track your progress, set priorities, and never miss a deadline again.' : 
-             language === 'es' ? 'Una poderosa herramienta de gestión de tareas que le ayuda a mantenerse organizado, enfocado y productivo. Haga seguimiento a su progreso, establezca prioridades y nunca más pierda una fecha límite.' : 
-             'Un outil puissant de gestion des tâches qui vous aide à rester organisé, concentré et productif. Suivez votre progression, définissez des priorités et ne manquez plus jamais une échéance.'}
-          </p>
-          
-          <div className="flex justify-center">
-            <Button 
-              className="bg-black hover:bg-black/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
-              onClick={handleGetStarted}
-            >
-              <span className="text-yellow-400">
-                {language === 'en' ? 'Get Started' : 
-                 language === 'es' ? 'Comenzar' : 
-                 'Commencer'}
-              </span>
-              <ArrowRight className="ml-2" />
-            </Button>
+      <main className="flex-grow">
+        <section className="py-16 md:py-24">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="space-y-4">
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tighter">
+                  Stay organized and boost your productivity
+                </h1>
+                <p className="text-muted-foreground md:text-xl">
+                  Track your tasks, manage your time, and achieve your goals with our powerful task management platform.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <p>Simple and intuitive task management</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <p>Track progress and prioritize tasks</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <p>Performance insights to optimize your workflow</p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 mt-6">
+                  {user ? (
+                    <Button asChild size="lg" className="sm:w-auto">
+                      <Link to="/dashboard">Go to Dashboard</Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button asChild size="lg" className="sm:w-auto">
+                        <Link to="/login">Get Started</Link>
+                      </Button>
+                      <Button asChild size="lg" variant="outline" className="sm:w-auto">
+                        <Link to="/about">Learn More</Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="lg:w-full">
+                <div className="relative overflow-hidden rounded-xl border bg-background p-2">
+                  <div className="bg-accent/50 rounded-lg p-6">
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-bold">Task Dashboard Preview</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-3 bg-card rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-primary/70"></div>
+                            <span>Complete project proposal</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">Due today</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-card rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-amber-500/70"></div>
+                            <span>Team meeting prep</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">Tomorrow</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-card rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-green-500/70"></div>
+                            <span>Review quarterly goals</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">Next week</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="glass-card p-6 text-center">
-            <h3 className="text-xl font-semibold mb-4">
-              {language === 'en' ? 'Task Organization' : 
-               language === 'es' ? 'Organización de Tareas' : 
-               'Organisation des Tâches'}
-            </h3>
-            <p className="text-gray-300">
-              {language === 'en' ? 'Categorize and prioritize your tasks with an intuitive interface.' : 
-               language === 'es' ? 'Categorice y priorice sus tareas con una interfaz intuitiva.' : 
-               'Catégorisez et hiérarchisez vos tâches avec une interface intuitive.'}
-            </p>
-          </div>
-          <div className="glass-card p-6 text-center">
-            <h3 className="text-xl font-semibold mb-4">
-              {language === 'en' ? 'Progress Tracking' : 
-               language === 'es' ? 'Seguimiento de Progreso' : 
-               'Suivi de Progression'}
-            </h3>
-            <p className="text-gray-300">
-              {language === 'en' ? 'Monitor your productivity with visual charts and statistics.' : 
-               language === 'es' ? 'Monitoree su productividad con gráficos visuales y estadísticas.' : 
-               'Suivez votre productivité avec des graphiques visuels et des statistiques.'}
-            </p>
-          </div>
-          <div className="glass-card p-6 text-center">
-            <h3 className="text-xl font-semibold mb-4">
-              {language === 'en' ? 'Notifications' : 
-               language === 'es' ? 'Notificaciones' : 
-               'Notifications'}
-            </h3>
-            <p className="text-gray-300">
-              {language === 'en' ? 'Get timely reminders for approaching deadlines and important tasks.' : 
-               language === 'es' ? 'Reciba recordatorios oportunos para fechas límite próximas y tareas importantes.' : 
-               'Recevez des rappels opportuns pour les échéances à venir et les tâches importantes.'}
-            </p>
-          </div>
-        </div>
+        </section>
       </main>
       
-      <footer className="container mx-auto p-6 border-t border-white/10 mt-20">
-        <div className="text-center text-gray-400">
-          <p>
-            {language === 'en' ? 'Copyrights 2025. Reserved' : 
-             language === 'es' ? 'Derechos de Autor 2025. Reservados' : 
-             'Droits d\'Auteur 2025. Réservés'}
+      <footer className="border-t py-6 md:py-0">
+        <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Task Tracker. All rights reserved.
           </p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <Link to="/about" className="hover:underline">About</Link>
+            <Link to="/contact" className="hover:underline">Contact</Link>
+          </div>
         </div>
       </footer>
     </div>

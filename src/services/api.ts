@@ -1,101 +1,75 @@
 
-// This file serves as the frontend API service that communicates with our backend
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { supabase } from "@/integrations/supabase/client";
+import { Task } from "@/types";
 
 // User related API calls
 export const userAPI = {
-  login: async (email: string, password: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+  getCurrentUser: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return data.user;
   },
   
-  register: async (name: string, email: string, password: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Registration failed');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    }
+  getProfile: async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) throw error;
+    return data;
   },
+  
+  updateProfile: async (userId: string, updates: { username?: string; avatar_url?: string }) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
 };
 
 // Task related API calls
 export const taskAPI = {
   getAllTasks: async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('created_at', { ascending: false });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Get tasks error:', error);
-      throw error;
-    }
+    if (error) throw error;
+    return data as Task[];
   },
   
   createTask: async (taskData: {
     title: string;
     description: string;
-    dueDate: string;
+    due_date: string;
     priority: string;
   }) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(taskData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create task');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Create task error:', error);
-      throw error;
+    const { data: user } = await supabase.auth.getUser();
+    
+    if (!user.user) {
+      throw new Error('User not authenticated');
     }
+    
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert({
+        ...taskData,
+        user_id: user.user.id,
+        completed: false
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
   },
   
   updateTask: async (
@@ -103,51 +77,29 @@ export const taskAPI = {
     taskData: {
       title?: string;
       description?: string;
-      dueDate?: string;
+      due_date?: string;
       priority?: string;
       completed?: boolean;
     }
   ) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(taskData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update task');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Update task error:', error);
-      throw error;
-    }
+    const { data, error } = await supabase
+      .from('tasks')
+      .update(taskData)
+      .eq('id', taskId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
   },
   
   deleteTask: async (taskId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete task');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Delete task error:', error);
-      throw error;
-    }
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId);
+    
+    if (error) throw error;
+    return { success: true };
   },
 };
