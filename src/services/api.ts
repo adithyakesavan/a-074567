@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Task } from "@/types";
+import { Task, Profile } from "@/types";
 
 // User related API calls
 export const userAPI = {
@@ -11,6 +11,7 @@ export const userAPI = {
   },
   
   getProfile: async (userId: string) => {
+    // Using any type to work around Supabase type issues
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -18,25 +19,27 @@ export const userAPI = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Profile;
   },
   
   updateProfile: async (userId: string, updates: { username?: string; avatar_url?: string }) => {
+    // Using any type to work around Supabase type issues
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(updates as any)
       .eq('id', userId)
       .select()
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Profile;
   }
 };
 
 // Task related API calls
 export const taskAPI = {
   getAllTasks: async () => {
+    // Using any type to work around Supabase type issues
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
@@ -58,18 +61,19 @@ export const taskAPI = {
       throw new Error('User not authenticated');
     }
     
+    // Using any type to work around Supabase type issues
     const { data, error } = await supabase
       .from('tasks')
       .insert({
         ...taskData,
         user_id: user.user.id,
         completed: false
-      })
+      } as any)
       .select()
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Task;
   },
   
   updateTask: async (
@@ -82,18 +86,20 @@ export const taskAPI = {
       completed?: boolean;
     }
   ) => {
+    // Using any type to work around Supabase type issues
     const { data, error } = await supabase
       .from('tasks')
-      .update(taskData)
+      .update(taskData as any)
       .eq('id', taskId)
       .select()
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Task;
   },
   
   deleteTask: async (taskId: string) => {
+    // Using any type to work around Supabase type issues
     const { error } = await supabase
       .from('tasks')
       .delete()
