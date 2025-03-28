@@ -11,9 +11,9 @@ export const userAPI = {
   },
   
   getProfile: async (userId: string) => {
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { data, error } = await supabase
-      .from('profiles')
+      .from('profiles' as any)
       .select('*')
       .eq('id', userId)
       .single();
@@ -23,9 +23,9 @@ export const userAPI = {
   },
   
   updateProfile: async (userId: string, updates: { username?: string; avatar_url?: string }) => {
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { data, error } = await supabase
-      .from('profiles')
+      .from('profiles' as any)
       .update(updates as any)
       .eq('id', userId)
       .select()
@@ -39,9 +39,9 @@ export const userAPI = {
 // Task related API calls
 export const taskAPI = {
   getAllTasks: async () => {
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { data, error } = await supabase
-      .from('tasks')
+      .from('tasks' as any)
       .select('*')
       .order('created_at', { ascending: false });
       
@@ -61,9 +61,9 @@ export const taskAPI = {
       throw new Error('User not authenticated');
     }
     
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { data, error } = await supabase
-      .from('tasks')
+      .from('tasks' as any)
       .insert({
         ...taskData,
         user_id: user.user.id,
@@ -86,9 +86,9 @@ export const taskAPI = {
       completed?: boolean;
     }
   ) => {
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { data, error } = await supabase
-      .from('tasks')
+      .from('tasks' as any)
       .update(taskData as any)
       .eq('id', taskId)
       .select()
@@ -99,9 +99,9 @@ export const taskAPI = {
   },
   
   deleteTask: async (taskId: string) => {
-    // Using any type to work around Supabase type issues
+    // Using type assertion to work around Supabase type issues
     const { error } = await supabase
-      .from('tasks')
+      .from('tasks' as any)
       .delete()
       .eq('id', taskId);
     
