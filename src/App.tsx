@@ -14,7 +14,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import UserProfile from "./pages/UserProfile";
 import Performance from "./pages/Performance";
+import Auth from "./pages/Auth";
 import { AuthProvider } from './contexts/AuthContext';
+import { PrivateRoute } from './components/PrivateRoute';
 
 // Create a language context
 export const LanguageContext = createContext({
@@ -24,26 +26,12 @@ export const LanguageContext = createContext({
 
 const queryClient = new QueryClient();
 
-// Simple auth check function
-const isAuthenticated = () => localStorage.getItem('isLoggedIn') === 'true';
-
 // Initialize language if not set
 const initializeLanguage = () => {
   if (!localStorage.getItem('language')) {
     localStorage.setItem('language', 'en');
   }
   return localStorage.getItem('language') || 'en';
-};
-
-// Initialize userName from email if not set
-const initializeUserName = () => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userEmail = localStorage.getItem('userEmail');
-  
-  if (isLoggedIn && userEmail && !localStorage.getItem('userName')) {
-    const userName = userEmail.split('@')[0].replace('.', ' ');
-    localStorage.setItem('userName', userName);
-  }
 };
 
 // Custom event for language change
@@ -64,7 +52,6 @@ const App = () => {
   // Initialize app settings
   useEffect(() => {
     initializeLanguage();
-    initializeUserName();
   }, []);
 
   return (
@@ -77,14 +64,22 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
-                  <Route path="/dashboard" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                  <Route path="/performance" element={<Performance />} />
+                  
+                  {/* Protected routes */}
+                  <Route element={<PrivateRoute />}>
+                    <Route path="/dashboard" element={<Index />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/performance" element={<Performance />} />
+                  </Route>
+                  
+                  {/* Fallback route */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AuthProvider>
