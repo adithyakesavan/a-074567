@@ -60,8 +60,8 @@
 }
 
 .glass-card {
-  @apply dark:bg-dashboard-card dark:bg-opacity-50 dark:backdrop-blur-lg dark:border dark:border-white/10 dark:rounded-xl
-         light:bg-white light:bg-opacity-90 light:backdrop-blur-lg light:border light:border-gray-200 light:rounded-xl;
+  @apply bg-white bg-opacity-90 backdrop-blur-lg border border-gray-200 rounded-xl
+         dark:bg-dashboard-card dark:bg-opacity-50 dark:backdrop-blur-lg dark:border dark:border-white/10 dark:rounded-xl;
 }
 
 .dashboard-card {
@@ -77,7 +77,7 @@
   @apply bg-dashboard-dark text-dashboard-text;
 }
 
-body.light {
+body:not(.dark) {
   @apply bg-gray-50 text-gray-900;
 }
 
@@ -85,6 +85,6 @@ body.light {
   @apply from-slate-900 to-slate-800;
 }
 
-.light .bg-gradient-to-br {
+.bg-gradient-to-br:not(.dark) {
   @apply from-blue-50 to-indigo-100;
 }
