@@ -1,3 +1,4 @@
+
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, Moon, CheckCircle, Clock, ListTodo 
@@ -57,22 +58,19 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
                 title="Total Tasks"
-                value={24}
-                total={24}
+                value={100}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
-                value={8}
-                total={24}
+                value={35}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
-                value={16}
-                total={24}
+                value={65}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />
