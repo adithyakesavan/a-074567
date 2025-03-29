@@ -11,42 +11,42 @@ export const userAPI = {
   },
   
   getProfile: async (userId: string) => {
-    // Using type assertion to work around Supabase type issues
-    const { data, error } = await supabase
-      .from('profiles' as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
     
-    if (error) throw error;
-    return data as Profile;
+    if (response.error) throw response.error;
+    return response.data as Profile;
   },
   
   updateProfile: async (userId: string, updates: { username?: string; avatar_url?: string }) => {
-    // Using type assertion to work around Supabase type issues
-    const { data, error } = await supabase
-      .from('profiles' as any)
-      .update(updates as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('profiles')
+      .update(updates)
       .eq('id', userId)
       .select()
       .single();
     
-    if (error) throw error;
-    return data as Profile;
+    if (response.error) throw response.error;
+    return response.data as Profile;
   }
 };
 
 // Task related API calls
 export const taskAPI = {
   getAllTasks: async () => {
-    // Using type assertion to work around Supabase type issues
-    const { data, error } = await supabase
-      .from('tasks' as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('tasks')
       .select('*')
       .order('created_at', { ascending: false });
       
-    if (error) throw error;
-    return data as Task[];
+    if (response.error) throw response.error;
+    return response.data as Task[];
   },
   
   createTask: async (taskData: {
@@ -61,19 +61,19 @@ export const taskAPI = {
       throw new Error('User not authenticated');
     }
     
-    // Using type assertion to work around Supabase type issues
-    const { data, error } = await supabase
-      .from('tasks' as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('tasks')
       .insert({
         ...taskData,
         user_id: user.user.id,
         completed: false
-      } as any)
+      })
       .select()
       .single();
     
-    if (error) throw error;
-    return data as Task;
+    if (response.error) throw response.error;
+    return response.data as Task;
   },
   
   updateTask: async (
@@ -86,26 +86,26 @@ export const taskAPI = {
       completed?: boolean;
     }
   ) => {
-    // Using type assertion to work around Supabase type issues
-    const { data, error } = await supabase
-      .from('tasks' as any)
-      .update(taskData as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('tasks')
+      .update(taskData)
       .eq('id', taskId)
       .select()
       .single();
     
-    if (error) throw error;
-    return data as Task;
+    if (response.error) throw response.error;
+    return response.data as Task;
   },
   
   deleteTask: async (taskId: string) => {
-    // Using type assertion to work around Supabase type issues
-    const { error } = await supabase
-      .from('tasks' as any)
+    // Use a type cast for the entire query chain
+    const response = await supabase
+      .from('tasks')
       .delete()
       .eq('id', taskId);
     
-    if (error) throw error;
+    if (response.error) throw response.error;
     return { success: true };
   },
 };
