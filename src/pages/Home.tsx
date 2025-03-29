@@ -1,30 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
+import { CheckSquare, ArrowRight, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/ThemeProvider';
-import { 
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { BarChart, LogOut } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 const Home = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { toast } = useToast();
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userEmail = localStorage.getItem('userEmail') || '';
-  const initials = userEmail ? userEmail.split('@')[0].charAt(0).toUpperCase() + 
-                  (userEmail.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '') : '';
   
   const handleGetStarted = () => {
     // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (isLoggedIn) {
       navigate('/dashboard');
     } else {
@@ -32,30 +19,10 @@ const Home = () => {
     }
   };
 
-  const handleSignOut = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('token');
-    
-    // Show toast notification
-    toast({
-      title: "Signed out",
-      description: "You have been signed out successfully",
-    });
-    
-    // Navigate to home page
-    navigate('/');
-  };
-  
-  const handlePerformance = () => {
-    navigate('/performance');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
       <header className="container mx-auto p-6 flex justify-between items-center">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="flex items-center gap-2">
           <CheckSquare className="w-6 h-6 text-dashboard-accent2" />
           <h1 className="text-2xl font-bold">Task Tracker</h1>
         </div>
@@ -67,84 +34,21 @@ const Home = () => {
           >
             Dashboard
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             className="text-white hover:text-white/80"
-            onClick={() => navigate('/about')}
           >
-            About
+            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
           <Button 
-            variant="ghost" 
-            className="text-white hover:text-white/80"
-            onClick={() => navigate('/contact')}
+            variant="outline" 
+            className="border-white/20 text-white hover:bg-white/10"
+            onClick={() => navigate('/login')}
           >
-            Contact
+            Login
           </Button>
-          <div 
-            className="cursor-grab active:cursor-grabbing"
-            draggable
-            onDragEnd={() => setTheme(theme === "light" ? "dark" : "light")}
-          >
-            <Lightbulb className="h-5 w-5 text-yellow-300" />
-          </div>
-          {!isLoggedIn ? (
-            <Button 
-              variant="outline" 
-              className="border-white/20 text-white hover:bg-white/10"
-              onClick={() => navigate('/login')}
-            >
-              Login
-            </Button>
-          ) : (
-            <Sheet>
-              <SheetTrigger asChild>
-                <div className="flex items-center gap-2 cursor-pointer">
-                  <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                    {initials}
-                  </div>
-                  <span>{userEmail.split('@')[0].replace('.', ' ')}</span>
-                </div>
-              </SheetTrigger>
-              <SheetContent className="glass-card border-white/10">
-                <SheetHeader>
-                  <SheetTitle className="text-center">Profile Options</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 flex flex-col gap-2">
-                  <Button 
-                    variant="ghost" 
-                    className="flex justify-start items-center gap-2"
-                    onClick={() => {
-                      navigate('/profile');
-                    }}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                      {initials}
-                    </div>
-                    <span>View Profile</span>
-                  </Button>
-
-                  <Button 
-                    variant="ghost" 
-                    className="flex justify-start items-center gap-2"
-                    onClick={handlePerformance}
-                  >
-                    <BarChart className="w-5 h-5 text-dashboard-accent3" />
-                    <span>Performance</span>
-                  </Button>
-
-                  <Button 
-                    variant="ghost" 
-                    className="flex justify-start items-center gap-2 text-red-400"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span>Sign Out</span>
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
         </nav>
       </header>
       
@@ -161,7 +65,7 @@ const Home = () => {
               className="bg-black hover:bg-black/80 text-white px-8 py-6 text-lg rounded-lg flex items-center gap-2"
               onClick={handleGetStarted}
             >
-              <span className="text-yellow-400">Get Started</span>
+              Get Started
               <ArrowRight className="ml-2" />
             </Button>
           </div>

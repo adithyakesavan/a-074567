@@ -1,33 +1,25 @@
 
 // This file serves as the frontend API service that communicates with our backend
-import { supabase } from "@/integrations/supabase/client";
 
-// Define interfaces for our data
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  due_date: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-  user_id?: string;
-  created_at?: string;
-}
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // User related API calls
 export const userAPI = {
   login: async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
       
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Login failed');
       }
       
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -36,73 +28,42 @@ export const userAPI = {
   
   register: async (name: string, email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          },
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ name, email, password }),
       });
       
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Registration failed');
       }
       
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
     }
   },
-
-  logout: async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  },
-
-  getCurrentUser: async () => {
-    try {
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (error) {
-        throw error;
-      }
-      
-      return data.user;
-    } catch (error) {
-      console.error('Get current user error:', error);
-      throw error;
-    }
-  }
 };
 
 // Task related API calls
 export const taskAPI = {
   getAllTasks: async () => {
     try {
-      // Using the generic RPC method with explicit typings to avoid type errors
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .order('due_date', { ascending: true }) as { data: Task[] | null, error: any };
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
       }
       
-      return data as Task[];
+      return await response.json();
     } catch (error) {
       console.error('Get tasks error:', error);
       throw error;
@@ -116,27 +77,21 @@ export const taskAPI = {
     priority: string;
   }) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(taskData),
+      });
       
-      // Using the generic RPC method with explicit typings to avoid type errors
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert({
-          title: taskData.title,
-          description: taskData.description,
-          due_date: taskData.dueDate,
-          priority: taskData.priority,
-          user_id: userData.user?.id,
-          completed: false
-        })
-        .select()
-        .single() as { data: Task | null, error: any };
-      
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Failed to create task');
       }
       
-      return data as Task;
+      return await response.json();
     } catch (error) {
       console.error('Create task error:', error);
       throw error;
@@ -154,27 +109,21 @@ export const taskAPI = {
     }
   ) => {
     try {
-      // Create an object with only the fields that need updating
-      const updateData: any = {};
-      if (taskData.title !== undefined) updateData.title = taskData.title;
-      if (taskData.description !== undefined) updateData.description = taskData.description;
-      if (taskData.dueDate !== undefined) updateData.due_date = taskData.dueDate;
-      if (taskData.priority !== undefined) updateData.priority = taskData.priority;
-      if (taskData.completed !== undefined) updateData.completed = taskData.completed;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(taskData),
+      });
       
-      // Using the generic RPC method with explicit typings to avoid type errors
-      const { data, error } = await supabase
-        .from('tasks')
-        .update(updateData)
-        .eq('id', taskId)
-        .select()
-        .single() as { data: Task | null, error: any };
-      
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Failed to update task');
       }
       
-      return data as Task;
+      return await response.json();
     } catch (error) {
       console.error('Update task error:', error);
       throw error;
@@ -183,17 +132,19 @@ export const taskAPI = {
   
   deleteTask: async (taskId: string) => {
     try {
-      // Using explicit type cast to avoid errors
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId) as { error: any };
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
       }
       
-      return { success: true };
+      return await response.json();
     } catch (error) {
       console.error('Delete task error:', error);
       throw error;
