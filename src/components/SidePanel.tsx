@@ -1,12 +1,47 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Settings, Users, Home, Info, Mail, LogOut, CheckSquare } from "lucide-react";
+import { LayoutDashboard, Settings, Users, Home, Info, Mail, LogOut, CheckSquare, Moon, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface SidePanelProps {
   onTabChange: (value: string) => void;
 }
 
 const SidePanel = ({ onTabChange }: SidePanelProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
+  
+  const userEmail = localStorage.getItem('userEmail') || 'john.smith@example.com';
+  const initials = userEmail.split('@')[0].charAt(0).toUpperCase() + 
+                  (userEmail.split('@')[0].split('.')[1]?.charAt(0).toUpperCase() || '');
+  
+  const handleSignOut = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('token');
+    
+    // Show toast notification
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully",
+    });
+    
+    // Navigate to home page
+    navigate('/');
+  };
+  
+  const handleMyTasks = () => {
+    onTabChange('dashboard');
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+  
   return (
     <div className="h-screen fixed left-0 top-0 w-64 glass-card border-r border-white/10">
       <div className="p-6">
@@ -47,6 +82,31 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          <button 
+            className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors"
+            onClick={() => navigate('/')}
+          >
+            <Home className="w-4 h-4" />
+            Home
+          </button>
+          
+          <button 
+            className="w-full text-left px-3 py-2 mt-2 rounded flex items-center gap-2 hover:bg-white/10 transition-colors"
+            onClick={toggleTheme}
+          >
+            {theme === "light" ? (
+              <>
+                <Moon className="w-4 h-4" />
+                Dark Mode
+              </>
+            ) : (
+              <>
+                <Sun className="w-4 h-4" />
+                Light Mode
+              </>
+            )}
+          </button>
         </div>
         
         <div className="mt-auto">
@@ -54,21 +114,27 @@ const SidePanel = ({ onTabChange }: SidePanelProps) => {
           <div className="glass-card p-3 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-dashboard-accent1 flex items-center justify-center text-white font-medium">
-                JS
+                {initials}
               </div>
               <div>
-                <p className="font-medium">John Smith</p>
-                <p className="text-xs text-dashboard-muted">john.smith@example.com</p>
+                <p className="font-medium">{userEmail.split('@')[0].replace('.', ' ')}</p>
+                <p className="text-xs text-dashboard-muted">{userEmail}</p>
               </div>
             </div>
           </div>
           
           <div className="flex flex-col gap-1">
-            <button className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors">
+            <button 
+              className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors"
+              onClick={handleMyTasks}
+            >
               <CheckSquare className="w-4 h-4 text-dashboard-accent3" />
               <span>My Tasks</span>
             </button>
-            <button className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400">
+            <button 
+              className="flex items-center gap-2 p-2 text-left rounded hover:bg-white/10 transition-colors text-red-400"
+              onClick={handleSignOut}
+            >
               <LogOut className="w-4 h-4" />
               <span>Sign Out</span>
             </button>
