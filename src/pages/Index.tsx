@@ -1,47 +1,23 @@
+
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, Moon, CheckCircle, Clock, ListTodo 
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Switch } from "@/components/ui/switch";
 import MetricCard from '@/components/MetricCard';
 import MonthlyChart from '@/components/MonthlyChart';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
-import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  // Check if user is logged in
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access the dashboard",
-        variant: "destructive",
-      });
-      navigate('/login');
-    }
-  }, [navigate, toast]);
 
   const handleMetricCardClick = (filter: 'all' | 'completed' | 'pending') => {
     setTaskFilter(filter);
     setActiveTab('dashboard');
-  };
-  
-  // Handles notification toggles
-  const handleNotificationToggle = (type: string) => {
-    toast({
-      title: `${type} notifications enabled`,
-      description: "You'll receive notifications for your tasks",
-    });
   };
 
   const renderContent = () => {
@@ -57,22 +33,19 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
                 title="Total Tasks"
-                value={24}
-                total={24}
+                value={100}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
-                value={8}
-                total={24}
+                value={35}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
-                value={16}
-                total={24}
+                value={65}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />
@@ -167,21 +140,21 @@ const Index = () => {
                       <p className="font-medium">Email Notifications</p>
                       <p className="text-sm text-gray-400">Receive task updates via email</p>
                     </div>
-                    <Switch onCheckedChange={() => handleNotificationToggle('Email')} />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Due Date Reminders</p>
                       <p className="text-sm text-gray-400">Get reminders 5 minutes before due date</p>
                     </div>
-                    <Switch onCheckedChange={() => handleNotificationToggle('Due date')} />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Push Notifications</p>
                       <p className="text-sm text-gray-400">Receive push notifications</p>
                     </div>
-                    <Switch onCheckedChange={() => handleNotificationToggle('Push')} />
+                    <Switch />
                   </div>
                 </div>
               </div>
@@ -207,18 +180,14 @@ const Index = () => {
                       <p className="font-medium">Dark Mode</p>
                       <p className="text-sm text-gray-400">Toggle dark mode</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Default Task View</p>
                       <p className="text-sm text-gray-400">Choose default task filter</p>
                     </div>
-                    <select 
-                      className="bg-transparent border border-white/10 rounded-md px-2 py-1"
-                      onChange={(e) => setTaskFilter(e.target.value as any)}
-                      value={taskFilter}
-                    >
+                    <select className="bg-transparent border border-white/10 rounded-md px-2 py-1">
                       <option value="all">All Tasks</option>
                       <option value="pending">Pending Only</option>
                       <option value="completed">Completed Only</option>
