@@ -92,10 +92,11 @@ export const userAPI = {
 export const taskAPI = {
   getAllTasks: async () => {
     try {
+      // Using the generic RPC method with explicit typings to avoid type errors
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .order('due_date', { ascending: true });
+        .order('due_date', { ascending: true }) as { data: Task[] | null, error: any };
       
       if (error) {
         throw error;
@@ -117,6 +118,7 @@ export const taskAPI = {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
+      // Using the generic RPC method with explicit typings to avoid type errors
       const { data, error } = await supabase
         .from('tasks')
         .insert({
@@ -128,7 +130,7 @@ export const taskAPI = {
           completed: false
         })
         .select()
-        .single();
+        .single() as { data: Task | null, error: any };
       
       if (error) {
         throw error;
@@ -160,12 +162,13 @@ export const taskAPI = {
       if (taskData.priority !== undefined) updateData.priority = taskData.priority;
       if (taskData.completed !== undefined) updateData.completed = taskData.completed;
       
+      // Using the generic RPC method with explicit typings to avoid type errors
       const { data, error } = await supabase
         .from('tasks')
         .update(updateData)
         .eq('id', taskId)
         .select()
-        .single();
+        .single() as { data: Task | null, error: any };
       
       if (error) {
         throw error;
@@ -180,10 +183,11 @@ export const taskAPI = {
   
   deleteTask: async (taskId: string) => {
     try {
+      // Using explicit type cast to avoid errors
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', taskId);
+        .eq('id', taskId) as { error: any };
       
       if (error) {
         throw error;
