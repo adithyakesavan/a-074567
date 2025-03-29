@@ -1,7 +1,7 @@
 
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
-  Shield, Moon, CheckCircle, Clock, ListTodo 
+  Shield, Moon, CheckCircle, Clock, ListTodo, LogOut
 } from 'lucide-react';
 import { useState } from 'react';
 import { Switch } from "@/components/ui/switch";
@@ -10,8 +10,14 @@ import MonthlyChart from '@/components/MonthlyChart';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
+import { useAuth } from '@/hooks/useAuth';
+import LoginForm from '@/components/LoginForm';
+import { Button } from '@/components/ui/button';
+import { useTasks } from '@/hooks/useTasks';
 
 const Index = () => {
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { tasks } = useTasks();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
 
@@ -20,32 +26,57 @@ const Index = () => {
     setActiveTab('dashboard');
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-dashboard-accent1"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dashboard-background p-4">
+        <LoginForm />
+      </div>
+    );
+  }
+
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const pendingTasks = tasks.filter(task => !task.completed).length;
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <>
-            <header className="mb-8">
-              <h1 className="text-3xl font-medium mb-2">Task Tracker Dashboard</h1>
-              <p className="text-dashboard-muted">Manage your tasks efficiently and stay on top of your deadlines</p>
+            <header className="mb-8 flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-medium mb-2">Task Tracker Dashboard</h1>
+                <p className="text-dashboard-muted">Manage your tasks efficiently and stay on top of your deadlines</p>
+              </div>
+              <Button variant="outline" className="gap-2" onClick={() => logout()}>
+                <LogOut size={16} />
+                Sign Out
+              </Button>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
                 title="Total Tasks"
-                value={100}
+                value={tasks.length}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
-                value={35}
+                value={completedTasks}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
-                value={65}
+                value={pendingTasks}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />

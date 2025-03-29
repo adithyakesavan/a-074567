@@ -1,48 +1,14 @@
 
 import React, { useState } from 'react';
-import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle } from 'lucide-react';
+import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-
-// Define the Task interface
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-}
-
-// Sample tasks data
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Create project proposal',
-    description: 'Draft a detailed proposal for the new client project',
-    dueDate: '2025-01-15T14:00',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '2',
-    title: 'Review team performance',
-    description: 'Conduct quarterly performance reviews for team members',
-    dueDate: '2025-01-20T10:00',
-    priority: 'medium',
-    completed: true,
-  },
-  {
-    id: '3',
-    title: 'Update documentation',
-    description: 'Update the user manual with the latest features',
-    dueDate: '2025-01-18T16:30',
-    priority: 'low',
-    completed: false,
-  },
-];
+import { useTasks } from '@/hooks/useTasks';
+import TaskForm from '@/components/TaskForm';
+import { Task, CreateTaskInput } from '@/services/taskService';
+import { toast } from 'sonner';
 
 // Filter types for task filtering
 type FilterType = 'all' | 'completed' | 'pending';
@@ -52,22 +18,64 @@ interface TaskListProps {
 }
 
 const TaskList = ({ filter = 'all' }: TaskListProps) => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { tasks, isLoading, createTask, updateTask, deleteTask, toggleTaskCompletion } = useTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Handle task creation
+  const handleCreateTask = (newTask: CreateTaskInput) => {
+    createTask(newTask, {
+      onError: (error) => {
+        console.error('Error creating task:', error);
+        toast.error('Failed to create task. Please try again.');
+      }
+    });
+  };
+
+  // Handle task update
+  const handleUpdateTask = (updatedTask: CreateTaskInput) => {
+    if (editingTask) {
+      updateTask({
+        id: editingTask.id,
+        ...updatedTask
+      }, {
+        onError: (error) => {
+          console.error('Error updating task:', error);
+          toast.error('Failed to update task. Please try again.');
+        }
+      });
+      setEditingTask(null);
+    }
+  };
 
   // Handle task completion toggle
-  const handleToggleComplete = (taskId: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleToggleComplete = (taskId: string, currentStatus: boolean) => {
+    toggleTaskCompletion({ id: taskId, completed: !currentStatus }, {
+      onError: (error) => {
+        console.error('Error toggling task completion:', error);
+        toast.error('Failed to update task status. Please try again.');
+      }
+    });
   };
 
   // Handle task deletion
   const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteTask(taskId, {
+        onError: (error) => {
+          console.error('Error deleting task:', error);
+          toast.error('Failed to delete task. Please try again.');
+        }
+      });
+    }
+  };
+
+  // Handle edit task
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskFormOpen(true);
   };
 
   // Filter tasks based on active filter
@@ -78,7 +86,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (searchQuery) {
       filtered = filtered.filter(task => 
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     
@@ -134,7 +142,13 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
+          <Button 
+            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
+            onClick={() => {
+              setEditingTask(null);
+              setIsTaskFormOpen(true);
+            }}
+          >
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
@@ -179,13 +193,22 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTasks.length > 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  <div className="flex justify-center items-center">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                    <span>Loading tasks...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
                 <TableRow key={task.id} className="hover:bg-white/5">
                   <TableCell>
                     <Checkbox
                       checked={task.completed}
-                      onCheckedChange={() => handleToggleComplete(task.id)}
+                      onCheckedChange={() => handleToggleComplete(task.id, task.completed)}
                     />
                   </TableCell>
                   <TableCell>
@@ -199,10 +222,10 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                       {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </span>
                   </TableCell>
-                  <TableCell>{formatDate(task.dueDate)}</TableCell>
+                  <TableCell>{formatDate(task.due_date)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTask(task)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -227,6 +250,13 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
           </TableBody>
         </Table>
       </div>
+
+      <TaskForm
+        open={isTaskFormOpen}
+        onOpenChange={setIsTaskFormOpen}
+        onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+        initialData={editingTask || undefined}
+      />
     </div>
   );
 };
