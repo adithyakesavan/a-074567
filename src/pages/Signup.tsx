@@ -1,21 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const handleSignup = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Redirect to dashboard if already authenticated
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -37,17 +48,50 @@ const Signup = () => {
       return;
     }
     
-    // For demo purposes, we'll just simulate a signup and login
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userName', name);
+    setLoading(true);
     
-    toast({
-      title: "Success!",
-      description: "Account created successfully",
-    });
-    
-    navigate('/dashboard');
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.user) {
+        toast({
+          title: "Success!",
+          description: "Account created successfully",
+        });
+        
+        // If email confirmation is enabled in Supabase
+        if (data.user.identities?.length === 0) {
+          toast({
+            title: "Email Verification Required",
+            description: "Please check your email to confirm your account before logging in",
+          });
+          navigate('/login');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast({
+        title: "Registration failed",
+        description: error.message || "An error occurred during registration",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -78,6 +122,7 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -90,6 +135,7 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -102,6 +148,7 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -114,11 +161,16 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           
-          <Button type="submit" className="w-full bg-black hover:bg-black/80">
-            Create Account
+          <Button 
+            type="submit" 
+            className="w-full bg-black hover:bg-black/80 text-white"
+            disabled={loading}
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </form>
         
