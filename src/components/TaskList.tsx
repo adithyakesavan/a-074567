@@ -1,10 +1,14 @@
 
 import React, { useState } from 'react';
-import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle } from 'lucide-react';
+import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { v4 as uuid } from 'uuid';
 
 // Define the Task interface
 export interface Task {
@@ -55,6 +59,17 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
+  const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
+  const [newTask, setNewTask] = useState<Partial<Task>>({
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium',
+    completed: false,
+  });
+  const { toast } = useToast();
 
   // Handle task completion toggle
   const handleToggleComplete = (taskId: string) => {
@@ -63,11 +78,104 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         task.id === taskId ? { ...task, completed: !task.completed } : task
       )
     );
+    
+    // Show notification
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      toast({
+        title: task.completed ? "Task unmarked" : "Task completed",
+        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`,
+      });
+    }
   };
 
   // Handle task deletion
   const handleDeleteTask = (taskId: string) => {
+    const taskToDelete = tasks.find(task => task.id === taskId);
     setTasks(tasks.filter((task) => task.id !== taskId));
+    
+    // Show notification
+    if (taskToDelete) {
+      toast({
+        title: "Task deleted",
+        description: `"${taskToDelete.title}" has been removed`,
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Handle edit task
+  const handleEditClick = (task: Task) => {
+    setEditingTask(task.id);
+    setEditForm({ ...task });
+  };
+  
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingTask(null);
+    setEditForm({});
+  };
+  
+  // Handle save edit
+  const handleSaveEdit = (taskId: string) => {
+    if (!editForm.title || !editForm.description || !editForm.dueDate || !editForm.priority) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, ...editForm as Task } 
+        : task
+    ));
+    
+    setEditingTask(null);
+    setEditForm({});
+    
+    toast({
+      title: "Task updated",
+      description: `"${editForm.title}" has been updated`,
+    });
+  };
+
+  // Handle add task
+  const handleAddTask = () => {
+    if (!newTask.title || !newTask.description || !newTask.dueDate || !newTask.priority) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const task: Task = {
+      id: uuid(),
+      title: newTask.title,
+      description: newTask.description,
+      dueDate: newTask.dueDate,
+      priority: newTask.priority as 'low' | 'medium' | 'high',
+      completed: false,
+    };
+
+    setTasks([...tasks, task]);
+    setNewTask({
+      title: '',
+      description: '',
+      dueDate: '',
+      priority: 'medium',
+      completed: false,
+    });
+    setIsAddTaskDialogOpen(false);
+
+    toast({
+      title: "Task added",
+      description: `"${task.title}" has been added to your tasks`,
+    });
   };
 
   // Filter tasks based on active filter
@@ -119,6 +227,10 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   };
 
   const filteredTasks = getFilteredTasks();
+  
+  React.useEffect(() => {
+    setActiveFilter(filter);
+  }, [filter]);
 
   return (
     <div className="dashboard-card">
@@ -134,7 +246,10 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
+          <Button 
+            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
+            onClick={() => setIsAddTaskDialogOpen(true)}
+          >
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
@@ -189,31 +304,102 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                     />
                   </TableCell>
                   <TableCell>
-                    <div className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                      {task.title}
-                    </div>
-                    <div className="text-sm text-gray-400 line-clamp-1">{task.description}</div>
+                    {editingTask === task.id ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={editForm.title}
+                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          className="bg-white/10 border-white/20"
+                          placeholder="Task title"
+                        />
+                        <Input
+                          value={editForm.description}
+                          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                          className="bg-white/10 border-white/20"
+                          placeholder="Task description"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>
+                          {task.title}
+                        </div>
+                        <div className="text-sm text-gray-400 line-clamp-1">{task.description}</div>
+                      </>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
-                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell>{formatDate(task.dueDate)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-600"
-                        onClick={() => handleDeleteTask(task.id)}
+                    {editingTask === task.id ? (
+                      <select
+                        value={editForm.priority}
+                        onChange={(e) => setEditForm({ 
+                          ...editForm, 
+                          priority: e.target.value as 'low' | 'medium' | 'high' 
+                        })}
+                        className="bg-white/10 border border-white/20 rounded px-2 py-1 text-sm"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    ) : (
+                      <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
+                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingTask === task.id ? (
+                      <Input
+                        type="datetime-local"
+                        value={editForm.dueDate?.slice(0, 16)}
+                        onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+                        className="bg-white/10 border-white/20"
+                      />
+                    ) : (
+                      formatDate(task.dueDate)
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {editingTask === task.id ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-green-500 hover:text-green-600"
+                          onClick={() => handleSaveEdit(task.id)}
+                        >
+                          <Save className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-red-500 hover:text-red-600"
+                          onClick={handleCancelEdit}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleEditClick(task)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-600"
+                          onClick={() => handleDeleteTask(task.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -227,6 +413,76 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Add Task Dialog */}
+      <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Task</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task-title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="task-title"
+                placeholder="Task title"
+                className="col-span-3"
+                value={newTask.title}
+                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task-description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="task-description"
+                placeholder="Task description"
+                className="col-span-3"
+                value={newTask.description}
+                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task-due-date" className="text-right">
+                Due Date
+              </Label>
+              <Input
+                id="task-due-date"
+                type="datetime-local"
+                className="col-span-3"
+                value={newTask.dueDate}
+                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="task-priority" className="text-right">
+                Priority
+              </Label>
+              <select
+                id="task-priority"
+                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={newTask.priority as string}
+                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddTaskDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddTask} className="bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
+              Add Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
