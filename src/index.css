@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,22 +26,70 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
   }
-}
-
-@layer base {
-  body {
-    @apply bg-dashboard-dark text-dashboard-text;
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-.glass-card {
-  @apply bg-dashboard-card bg-opacity-50 backdrop-blur-lg border border-white/10 rounded-xl;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-.dashboard-card {
-  @apply p-6 glass-card transition-all duration-300 hover:border-white/20;
+@layer components {
+  .glass-card {
+    @apply bg-white bg-opacity-90 backdrop-blur-lg border border-gray-200 rounded-xl;
+  }
+
+  .dark .glass-card {
+    @apply bg-dashboard-card bg-opacity-50 backdrop-blur-lg border border-white/10 rounded-xl;
+  }
+
+  .dashboard-card {
+    @apply p-6 glass-card transition-all duration-300 hover:border-white/20;
+  }
+
+  .metric-card {
+    @apply relative flex flex-col items-center justify-center p-8 dashboard-card;
+  }
 }
 
-.metric-card {
-  @apply relative flex flex-col items-center justify-center p-8 dashboard-card;
+/* Adjust the gradient background and text colors based on theme */
+.dark body {
+  @apply bg-dashboard-dark text-dashboard-text;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.dark .bg-gradient-to-br {
+  @apply from-slate-900 to-slate-800;
+}
+
+.bg-gradient-to-br {
+  @apply from-blue-50 to-indigo-100;
 }

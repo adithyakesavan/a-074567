@@ -1,82 +1,78 @@
-
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
-  Shield, Moon, CheckCircle, Clock, ListTodo, LogOut
+  Shield, Moon, CheckCircle, Clock, ListTodo 
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import MetricCard from '@/components/MetricCard';
 import MonthlyChart from '@/components/MonthlyChart';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
-import { useAuth } from '@/hooks/useAuth';
-import LoginForm from '@/components/LoginForm';
-import { Button } from '@/components/ui/button';
-import { useTasks } from '@/hooks/useTasks';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
-  const { tasks } = useTasks();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Check if user is logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access the dashboard",
+        variant: "destructive",
+      });
+      navigate('/login');
+    }
+  }, [navigate, toast]);
 
   const handleMetricCardClick = (filter: 'all' | 'completed' | 'pending') => {
     setTaskFilter(filter);
     setActiveTab('dashboard');
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-dashboard-accent1"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-dashboard-background p-4">
-        <LoginForm />
-      </div>
-    );
-  }
-
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const pendingTasks = tasks.filter(task => !task.completed).length;
+  
+  // Handles notification toggles
+  const handleNotificationToggle = (type: string) => {
+    toast({
+      title: `${type} notifications enabled`,
+      description: "You'll receive notifications for your tasks",
+    });
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <>
-            <header className="mb-8 flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-medium mb-2">Task Tracker Dashboard</h1>
-                <p className="text-dashboard-muted">Manage your tasks efficiently and stay on top of your deadlines</p>
-              </div>
-              <Button variant="outline" className="gap-2" onClick={() => logout()}>
-                <LogOut size={16} />
-                Sign Out
-              </Button>
+            <header className="mb-8">
+              <h1 className="text-3xl font-medium mb-2">Task Tracker Dashboard</h1>
+              <p className="text-dashboard-muted">Manage your tasks efficiently and stay on top of your deadlines</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <MetricCard
                 title="Total Tasks"
-                value={tasks.length}
+                value={24}
+                total={24}
                 color="#61AAF2"
                 onClick={() => handleMetricCardClick('all')}
               />
               <MetricCard
                 title="Completed"
-                value={completedTasks}
+                value={8}
+                total={24}
                 color="#7EBF8E"
                 onClick={() => handleMetricCardClick('completed')}
               />
               <MetricCard
                 title="Pending"
-                value={pendingTasks}
+                value={16}
+                total={24}
                 color="#8989DE"
                 onClick={() => handleMetricCardClick('pending')}
               />
@@ -171,21 +167,21 @@ const Index = () => {
                       <p className="font-medium">Email Notifications</p>
                       <p className="text-sm text-gray-400">Receive task updates via email</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Email')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Due Date Reminders</p>
                       <p className="text-sm text-gray-400">Get reminders 5 minutes before due date</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Due date')} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Push Notifications</p>
                       <p className="text-sm text-gray-400">Receive push notifications</p>
                     </div>
-                    <Switch />
+                    <Switch onCheckedChange={() => handleNotificationToggle('Push')} />
                   </div>
                 </div>
               </div>
@@ -211,14 +207,18 @@ const Index = () => {
                       <p className="font-medium">Dark Mode</p>
                       <p className="text-sm text-gray-400">Toggle dark mode</p>
                     </div>
-                    <Switch />
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Default Task View</p>
                       <p className="text-sm text-gray-400">Choose default task filter</p>
                     </div>
-                    <select className="bg-transparent border border-white/10 rounded-md px-2 py-1">
+                    <select 
+                      className="bg-transparent border border-white/10 rounded-md px-2 py-1"
+                      onChange={(e) => setTaskFilter(e.target.value as any)}
+                      value={taskFilter}
+                    >
                       <option value="all">All Tasks</option>
                       <option value="pending">Pending Only</option>
                       <option value="completed">Completed Only</option>
