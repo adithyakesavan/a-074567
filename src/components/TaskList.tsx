@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import SearchBar from './SearchBar';
-import NewTaskForm from './NewTaskForm';
 
 // Define the Task interface
 export interface Task {
@@ -60,9 +58,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
-  const [searchResults, setSearchResults] = useState<Task[] | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const { toast } = useToast();
 
   // Handle task completion toggle
@@ -73,11 +68,12 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       )
     );
     
+    // Show notification
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       toast({
         title: task.completed ? "Task unmarked" : "Task completed",
-        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`
+        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`,
       });
     }
   };
@@ -87,11 +83,12 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     const taskToDelete = tasks.find(task => task.id === taskId);
     setTasks(tasks.filter((task) => task.id !== taskId));
     
+    // Show notification
     if (taskToDelete) {
       toast({
         title: "Task deleted",
         description: `"${taskToDelete.title}" has been removed`,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -114,7 +111,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -130,36 +127,23 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     
     toast({
       title: "Task updated",
-      description: `"${editForm.title}" has been updated`
+      description: `"${editForm.title}" has been updated`,
     });
-  };
-
-  // Handle adding a new task
-  const handleAddTask = (newTask: Task) => {
-    setTasks([...tasks, newTask]);
-  };
-
-  // Handle search results
-  const handleSearchResults = (results: Task[]) => {
-    setSearchResults(results);
-  };
-
-  // Handle clearing search results
-  const clearSearchResults = () => {
-    setSearchResults(null);
   };
 
   // Filter tasks based on active filter
   const getFilteredTasks = () => {
-    let filtered = searchResults || tasks;
+    let filtered = tasks;
     
-    if (searchQuery && !searchResults) {
+    // Apply search filter
+    if (searchQuery) {
       filtered = filtered.filter(task => 
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
+    // Apply status filter
     if (activeFilter === 'completed') {
       return filtered.filter(task => task.completed);
     } else if (activeFilter === 'pending') {
@@ -206,60 +190,20 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-medium">Tasks</h2>
         <div className="flex items-center gap-4">
-          <Button 
-            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
-            onClick={() => setIsNewTaskOpen(true)}
-          >
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search tasks..."
+              className="pl-8 w-64 bg-transparent"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
         </div>
-      </div>
-
-      {/* New Task Dialog */}
-      <NewTaskForm 
-        open={isNewTaskOpen} 
-        onOpenChange={setIsNewTaskOpen}
-        onTaskCreate={handleAddTask}
-      />
-
-      <div className="mb-6 space-y-4">
-        <SearchBar onSearchResults={handleSearchResults} setIsLoading={setIsSearching} />
-        
-        <div className="relative flex items-center">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Filter tasks by keyword..."
-            className="pl-8 bg-transparent"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              if (searchResults) setSearchResults(null);
-            }}
-          />
-        </div>
-        
-        {searchResults && (
-          <div className="flex items-center justify-between bg-white/10 p-2 rounded">
-            <span className="text-sm text-gray-300">
-              Showing AI search results ({searchResults.length} tasks)
-            </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearSearchResults}
-              className="text-gray-400 hover:text-white"
-            >
-              <X className="w-4 h-4 mr-1" /> Clear
-            </Button>
-          </div>
-        )}
-        
-        {isSearching && (
-          <div className="text-center py-2 text-gray-400">
-            Searching with AI...
-          </div>
-        )}
       </div>
 
       <div className="flex gap-4 mb-6">

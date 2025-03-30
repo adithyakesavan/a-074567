@@ -1,30 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   
-  useEffect(() => {
-    // Redirect to dashboard if already authenticated
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -37,36 +26,16 @@ const Login = () => {
       return;
     }
     
-    setLoading(true);
+    // For demo purposes, we'll just simulate a login
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userEmail', email);
     
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data.user) {
-        toast({
-          title: "Success!",
-          description: "You have been logged in",
-        });
-        
-        navigate('/dashboard');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      toast({
-        title: "Login failed",
-        description: error.message || "An error occurred during login",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Success!",
+      description: "You have been logged in",
+    });
+    
+    navigate('/dashboard');
   };
   
   return (
@@ -97,7 +66,6 @@ const Login = () => {
               className="bg-white/10 border-white/20 text-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
             />
           </div>
           
@@ -110,16 +78,11 @@ const Login = () => {
               className="bg-white/10 border-white/20 text-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
             />
           </div>
           
-          <Button 
-            type="submit" 
-            className="w-full bg-black hover:bg-black/80 text-white" 
-            disabled={loading}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
+          <Button type="submit" className="w-full bg-black hover:bg-black/80">
+            Sign In
           </Button>
         </form>
         
