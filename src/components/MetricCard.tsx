@@ -16,7 +16,7 @@ const MetricCard = ({ title, value, color, onClick }: MetricCardProps) => {
       <div className="relative w-32 h-32 mb-6">
         <CircularProgressbar
           value={value}
-          text={`${value}`}
+          text={`${value}%`}
           styles={buildStyles({
             textSize: '1.25rem',
             pathColor: color,

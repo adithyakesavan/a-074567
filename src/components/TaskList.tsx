@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
-import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
+import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 
 // Define the Task interface
 export interface Task {
@@ -56,9 +55,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
-  const [editingTask, setEditingTask] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Task>>({});
-  const { toast } = useToast();
 
   // Handle task completion toggle
   const handleToggleComplete = (taskId: string) => {
@@ -67,68 +63,11 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         task.id === taskId ? { ...task, completed: !task.completed } : task
       )
     );
-    
-    // Show notification
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      toast({
-        title: task.completed ? "Task unmarked" : "Task completed",
-        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`,
-      });
-    }
   };
 
   // Handle task deletion
   const handleDeleteTask = (taskId: string) => {
-    const taskToDelete = tasks.find(task => task.id === taskId);
     setTasks(tasks.filter((task) => task.id !== taskId));
-    
-    // Show notification
-    if (taskToDelete) {
-      toast({
-        title: "Task deleted",
-        description: `"${taskToDelete.title}" has been removed`,
-        variant: "destructive",
-      });
-    }
-  };
-  
-  // Handle edit task
-  const handleEditClick = (task: Task) => {
-    setEditingTask(task.id);
-    setEditForm({ ...task });
-  };
-  
-  // Handle cancel edit
-  const handleCancelEdit = () => {
-    setEditingTask(null);
-    setEditForm({});
-  };
-  
-  // Handle save edit
-  const handleSaveEdit = (taskId: string) => {
-    if (!editForm.title || !editForm.description || !editForm.dueDate || !editForm.priority) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, ...editForm as Task } 
-        : task
-    ));
-    
-    setEditingTask(null);
-    setEditForm({});
-    
-    toast({
-      title: "Task updated",
-      description: `"${editForm.title}" has been updated`,
-    });
   };
 
   // Filter tasks based on active filter
@@ -180,10 +119,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   };
 
   const filteredTasks = getFilteredTasks();
-  
-  React.useEffect(() => {
-    setActiveFilter(filter);
-  }, [filter]);
 
   return (
     <div className="dashboard-card">
@@ -254,102 +189,31 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                     />
                   </TableCell>
                   <TableCell>
-                    {editingTask === task.id ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editForm.title}
-                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                          className="bg-white/10 border-white/20"
-                          placeholder="Task title"
-                        />
-                        <Input
-                          value={editForm.description}
-                          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                          className="bg-white/10 border-white/20"
-                          placeholder="Task description"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <div className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                          {task.title}
-                        </div>
-                        <div className="text-sm text-gray-400 line-clamp-1">{task.description}</div>
-                      </>
-                    )}
+                    <div className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>
+                      {task.title}
+                    </div>
+                    <div className="text-sm text-gray-400 line-clamp-1">{task.description}</div>
                   </TableCell>
                   <TableCell>
-                    {editingTask === task.id ? (
-                      <select
-                        value={editForm.priority}
-                        onChange={(e) => setEditForm({ 
-                          ...editForm, 
-                          priority: e.target.value as 'low' | 'medium' | 'high' 
-                        })}
-                        className="bg-white/10 border border-white/20 rounded px-2 py-1 text-sm"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
-                    ) : (
-                      <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </span>
-                    )}
+                    <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
+                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                    </span>
                   </TableCell>
-                  <TableCell>
-                    {editingTask === task.id ? (
-                      <Input
-                        type="datetime-local"
-                        value={editForm.dueDate?.slice(0, 16)}
-                        onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
-                        className="bg-white/10 border-white/20"
-                      />
-                    ) : (
-                      formatDate(task.dueDate)
-                    )}
-                  </TableCell>
+                  <TableCell>{formatDate(task.dueDate)}</TableCell>
                   <TableCell className="text-right">
-                    {editingTask === task.id ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-green-500 hover:text-green-600"
-                          onClick={() => handleSaveEdit(task.id)}
-                        >
-                          <Save className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-red-500 hover:text-red-600"
-                          onClick={handleCancelEdit}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleEditClick(task)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-600"
-                          onClick={() => handleDeleteTask(task.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-600"
+                        onClick={() => handleDeleteTask(task.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
