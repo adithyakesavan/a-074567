@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { useEffect, createContext, useState } from "react";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -14,12 +14,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import UserProfile from "./pages/UserProfile";
 import Performance from "./pages/Performance";
-
-// Create a language context
-export const LanguageContext = createContext({
-  language: 'en',
-  setLanguage: (lang: string) => {}
-});
 
 const queryClient = new QueryClient();
 
@@ -31,7 +25,6 @@ const initializeLanguage = () => {
   if (!localStorage.getItem('language')) {
     localStorage.setItem('language', 'en');
   }
-  return localStorage.getItem('language') || 'en';
 };
 
 // Initialize userName from email if not set
@@ -45,21 +38,7 @@ const initializeUserName = () => {
   }
 };
 
-// Custom event for language change
-export const triggerLanguageChange = () => {
-  window.dispatchEvent(new Event('languageChange'));
-};
-
 const App = () => {
-  const [language, setLanguage] = useState(initializeLanguage());
-  
-  // Language state setter that also updates localStorage
-  const handleSetLanguage = (lang: string) => {
-    localStorage.setItem('language', lang);
-    setLanguage(lang);
-    triggerLanguageChange();
-  };
-
   // Initialize app settings
   useEffect(() => {
     initializeLanguage();
@@ -67,29 +46,27 @@ const App = () => {
   }, []);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage }}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="dark" storageKey="task-tracker-theme">
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/performance" element={<Performance />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </LanguageContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="task-tracker-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/performance" element={<Performance />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
