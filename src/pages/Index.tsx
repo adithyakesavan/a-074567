@@ -3,7 +3,7 @@ import {
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, CheckCircle, Clock, ListTodo, User, BarChart, LogOut
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import {
@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { LanguageContext, triggerLanguageChange } from '../App';
 import MetricCard from '@/components/MetricCard';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
@@ -22,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [taskFilter, setTaskFilter] = useState<'all' | 'completed' | 'pending'>('all');
-  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
+  const { language, setLanguage } = useContext(LanguageContext);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -54,15 +56,18 @@ const Index = () => {
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
-    localStorage.setItem('language', value);
     
     let languageName = 'English';
     if (value === 'es') languageName = 'Spanish';
     if (value === 'fr') languageName = 'French';
     
     toast({
-      title: "Language changed",
-      description: `Interface language set to ${languageName}`,
+      title: language === 'en' ? "Language changed" :
+             language === 'es' ? "Idioma cambiado" :
+             "Langue changée",
+      description: language === 'en' ? `Interface language set to ${languageName}` :
+                   language === 'es' ? `Idioma de la interfaz establecido a ${languageName}` :
+                   `Langue de l'interface définie sur ${languageName}`,
     });
   };
 
