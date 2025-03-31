@@ -6,9 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { v4 as uuid } from 'uuid';
 
 // Define the Task interface
 export interface Task {
@@ -61,14 +58,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
-  const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
-  const [newTask, setNewTask] = useState<Partial<Task>>({
-    title: '',
-    description: '',
-    dueDate: '',
-    priority: 'medium',
-    completed: false,
-  });
   const { toast } = useToast();
 
   // Handle task completion toggle
@@ -142,42 +131,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     });
   };
 
-  // Handle add task
-  const handleAddTask = () => {
-    if (!newTask.title || !newTask.description || !newTask.dueDate || !newTask.priority) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const task: Task = {
-      id: uuid(),
-      title: newTask.title,
-      description: newTask.description,
-      dueDate: newTask.dueDate,
-      priority: newTask.priority as 'low' | 'medium' | 'high',
-      completed: false,
-    };
-
-    setTasks([...tasks, task]);
-    setNewTask({
-      title: '',
-      description: '',
-      dueDate: '',
-      priority: 'medium',
-      completed: false,
-    });
-    setIsAddTaskDialogOpen(false);
-
-    toast({
-      title: "Task added",
-      description: `"${task.title}" has been added to your tasks`,
-    });
-  };
-
   // Filter tasks based on active filter
   const getFilteredTasks = () => {
     let filtered = tasks;
@@ -246,10 +199,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button 
-            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
-            onClick={() => setIsAddTaskDialogOpen(true)}
-          >
+          <Button className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
             <PlusCircle className="w-4 h-4" />
             Add Task
           </Button>
@@ -413,76 +363,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
           </TableBody>
         </Table>
       </div>
-
-      {/* Add Task Dialog */}
-      <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="task-title" className="text-right">
-                Title
-              </Label>
-              <Input
-                id="task-title"
-                placeholder="Task title"
-                className="col-span-3"
-                value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="task-description" className="text-right">
-                Description
-              </Label>
-              <Input
-                id="task-description"
-                placeholder="Task description"
-                className="col-span-3"
-                value={newTask.description}
-                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="task-due-date" className="text-right">
-                Due Date
-              </Label>
-              <Input
-                id="task-due-date"
-                type="datetime-local"
-                className="col-span-3"
-                value={newTask.dueDate}
-                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="task-priority" className="text-right">
-                Priority
-              </Label>
-              <select
-                id="task-priority"
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={newTask.priority as string}
-                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddTaskDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddTask} className="bg-dashboard-accent1 hover:bg-dashboard-accent1/80">
-              Add Task
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

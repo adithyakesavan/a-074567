@@ -6,19 +6,19 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%; /* Changed to black */
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%; /* Changed to black */
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%; /* Changed to black */
+    --popover-foreground: 222.2 84% 4.9%;
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 0 0% 0%; /* Changed to black */
+    --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
-    --muted-foreground: 0 0% 45%; /* Changed to dark gray */
+    --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
-    --accent-foreground: 0 0% 0%; /* Changed to black */
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
@@ -83,7 +83,7 @@
 }
 
 body {
-  @apply bg-gray-50 text-black;
+  @apply bg-gray-50 text-gray-900;
 }
 
 .dark .bg-gradient-to-br {
@@ -92,72 +92,4 @@ body {
 
 .bg-gradient-to-br {
   @apply from-blue-50 to-indigo-100;
-}
-
-/* Add specific light mode text color overrides */
-:root:not(.dark) button,
-:root:not(.dark) a,
-:root:not(.dark) h1,
-:root:not(.dark) h2,
-:root:not(.dark) h3,
-:root:not(.dark) h4,
-:root:not(.dark) h5,
-:root:not(.dark) h6,
-:root:not(.dark) p,
-:root:not(.dark) span,
-:root:not(.dark) li,
-:root:not(.dark) label {
-  color: black;
-}
-
-/* Ensure text in inputs is black in light mode */
-:root:not(.dark) input,
-:root:not(.dark) select,
-:root:not(.dark) textarea {
-  color: black;
-}
-
-/* Override tabs text color in light mode */
-:root:not(.dark) [role="tab"] {
-  color: black;
-}
-
-/* Ensure navigation items are black in light mode */
-:root:not(.dark) nav a,
-:root:not(.dark) nav button {
-  color: black;
-}
-
-/* Fix MetricCard text colors in light mode */
-:root:not(.dark) .metric-card h3,
-:root:not(.dark) .metric-card div {
-  color: black;
-}
-
-/* Make sure dashboard cards have black text in light mode */
-:root:not(.dark) .dashboard-card {
-  color: black;
-}
-
-/* Override any muted text to be dark gray instead of too light */
-:root:not(.dark) .text-dashboard-muted,
-:root:not(.dark) .text-muted-foreground {
-  color: #555555;
-}
-
-/* Keep the yellow color for "Get Started" text in light mode */
-:root:not(.dark) .text-yellow-400,
-:root:not(.dark) .text-yellow-300 {
-  color: #FACC15 !important; 
-}
-
-/* Make sure the yellow color is preserved even for explicitly defined elements */
-.text-yellow-400,
-.text-yellow-300 {
-  color: #FACC15 !important;
-}
-
-/* Get Started text special styling for light mode */
-:root:not(.dark) span.text-yellow-400 {
-  color: #FACC15 !important;
 }
