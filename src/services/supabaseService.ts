@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Task, Notification } from '@/types/supabase';
+import { Task, Notification, Profile } from '@/types/supabase';
 import { toast } from 'sonner';
 
 // Auth functions
@@ -62,6 +62,42 @@ export const supabaseAuth = {
       console.error('Error signing out:', error);
       throw error;
     }
+  }
+};
+
+// Profile functions
+export const profileService = {
+  // Get user profile
+  getProfile: async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+    
+    return data as Profile;
+  },
+
+  // Update user profile
+  updateProfile: async (userId: string, updates: Partial<Profile>) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+    
+    return data as Profile;
   }
 };
 

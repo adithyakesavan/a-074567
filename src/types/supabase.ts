@@ -33,3 +33,11 @@ export interface Session {
   access_token: string;
   refresh_token: string;
 }
+
+export interface Profile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
