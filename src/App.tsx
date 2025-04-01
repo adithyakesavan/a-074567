@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useEffect, createContext, useState } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -14,6 +15,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import UserProfile from "./pages/UserProfile";
 import Performance from "./pages/Performance";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Create a language context
 export const LanguageContext = createContext({
@@ -23,9 +25,6 @@ export const LanguageContext = createContext({
 
 const queryClient = new QueryClient();
 
-// Simple auth check function
-const isAuthenticated = () => localStorage.getItem('isLoggedIn') === 'true';
-
 // Initialize language if not set
 const initializeLanguage = () => {
   if (!localStorage.getItem('language')) {
@@ -34,20 +33,37 @@ const initializeLanguage = () => {
   return localStorage.getItem('language') || 'en';
 };
 
-// Initialize userName from email if not set
-const initializeUserName = () => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userEmail = localStorage.getItem('userEmail');
-  
-  if (isLoggedIn && userEmail && !localStorage.getItem('userName')) {
-    const userName = userEmail.split('@')[0].replace('.', ' ');
-    localStorage.setItem('userName', userName);
-  }
-};
-
 // Custom event for language change
 export const triggerLanguageChange = () => {
   window.dispatchEvent(new Event('languageChange'));
+};
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Index />
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <UserProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/performance" element={
+        <ProtectedRoute>
+          <Performance />
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 };
 
 const App = () => {
@@ -63,7 +79,6 @@ const App = () => {
   // Initialize app settings
   useEffect(() => {
     initializeLanguage();
-    initializeUserName();
   }, []);
 
   return (
@@ -74,17 +89,9 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/performance" element={<Performance />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <AuthProvider>
+                <AppRoutes />
+              </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>

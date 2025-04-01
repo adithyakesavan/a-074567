@@ -1,4 +1,3 @@
-
 import { 
   ShoppingCart, Smartphone, Box, UserPlus, Key, Bell, Globe, 
   Shield, CheckCircle, Clock, ListTodo, User, BarChart, LogOut
@@ -19,7 +18,9 @@ import MetricCard from '@/components/MetricCard';
 import CustomerRequests from '@/components/CustomerRequests';
 import SidePanel from '@/components/SidePanel';
 import TaskList from '@/components/TaskList';
+import NotificationList from '@/components/NotificationList';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -27,26 +28,9 @@ const Index = () => {
   const { language, setLanguage } = useContext(LanguageContext);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  // Check if user is logged in
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access the dashboard",
-        variant: "destructive",
-      });
-      navigate('/login');
-    }
-  }, [navigate, toast]);
-
-  const handleMetricCardClick = (filter: 'all' | 'completed' | 'pending') => {
-    setTaskFilter(filter);
-    setActiveTab('dashboard');
-  };
-  
-  // Handles notification toggles
+  // Handle notification toggles
   const handleNotificationToggle = (type: string) => {
     toast({
       title: `${type} notifications enabled`,
@@ -69,6 +53,11 @@ const Index = () => {
                    language === 'es' ? `Idioma de la interfaz establecido a ${languageName}` :
                    `Langue de l'interface définie sur ${languageName}`,
     });
+  };
+
+  const handleMetricCardClick = (filter: 'all' | 'completed' | 'pending') => {
+    setTaskFilter(filter);
+    setActiveTab('dashboard');
   };
 
   const renderContent = () => {
@@ -119,9 +108,17 @@ const Index = () => {
               />
             </div>
 
-            <TaskList filter={taskFilter} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="md:col-span-2">
+                <TaskList filter={taskFilter} />
+              </div>
+              <div>
+                <NotificationList />
+              </div>
+            </div>
           </>
         );
+        
       case 'users':
         return (
           <>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -8,45 +8,11 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { v4 as uuid } from 'uuid';
-
-// Define the Task interface
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: 'low' | 'medium' | 'high';
-  completed: boolean;
-}
-
-// Sample tasks data
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Create project proposal',
-    description: 'Draft a detailed proposal for the new client project',
-    dueDate: '2025-01-15T14:00',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '2',
-    title: 'Review team performance',
-    description: 'Conduct quarterly performance reviews for team members',
-    dueDate: '2025-01-20T10:00',
-    priority: 'medium',
-    completed: true,
-  },
-  {
-    id: '3',
-    title: 'Update documentation',
-    description: 'Update the user manual with the latest features',
-    dueDate: '2025-01-18T16:30',
-    priority: 'low',
-    completed: false,
-  },
-];
+import { toast } from 'sonner';
+import { taskService } from '@/services/supabaseService';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Task } from '@/types/supabase';
 
 // Filter types for task filtering
 type FilterType = 'all' | 'completed' | 'pending';
@@ -56,7 +22,7 @@ interface TaskListProps {
 }
 
 const TaskList = ({ filter = 'all' }: TaskListProps) => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>(filter);
   const [editingTask, setEditingTask] = useState<string | null>(null);
@@ -65,40 +31,111 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const [newTask, setNewTask] = useState<Partial<Task>>({
     title: '',
     description: '',
-    dueDate: '',
+    due_date: '',
     priority: 'medium',
     completed: false,
+    status: 'pending'
   });
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Load tasks on component mount
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await taskService.getTasks();
+        setTasks(data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load tasks",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchTasks();
+    }
+  }, [user, toast]);
+
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!user?.email) return;
+
+    const channel = supabase
+      .channel('tasks-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks',
+          filter: `email_id=eq.${user.email}`
+        },
+        async () => {
+          // Refresh tasks when changes occur
+          const data = await taskService.getTasks();
+          setTasks(data);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.email]);
 
   // Handle task completion toggle
-  const handleToggleComplete = (taskId: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
-    );
-    
-    // Show notification
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
+  const handleToggleComplete = async (taskId: string) => {
+    try {
+      const taskToToggle = tasks.find(t => t.id === taskId);
+      if (!taskToToggle) return;
+
+      const updatedTask = await taskService.updateTask(taskId, {
+        completed: !taskToToggle.completed
+      });
+      
+      // Toast is handled by the component, but the database update is done through the service
       toast({
-        title: task.completed ? "Task unmarked" : "Task completed",
-        description: `"${task.title}" ${task.completed ? "is now active" : "has been completed"}`,
+        title: updatedTask.completed ? "Task completed" : "Task unmarked",
+        description: `"${updatedTask.title}" ${updatedTask.completed ? "has been completed" : "is now active"}`,
+      });
+    } catch (error) {
+      console.error('Toggle task error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task status",
+        variant: "destructive",
       });
     }
   };
 
   // Handle task deletion
-  const handleDeleteTask = (taskId: string) => {
-    const taskToDelete = tasks.find(task => task.id === taskId);
-    setTasks(tasks.filter((task) => task.id !== taskId));
-    
-    // Show notification
-    if (taskToDelete) {
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const taskToDelete = tasks.find(task => task.id === taskId);
+      if (!taskToDelete) return;
+      
+      await taskService.deleteTask(taskId);
+
+      // The real-time subscription will update the list, but we'll also update the local state
+      setTasks(tasks.filter((task) => task.id !== taskId));
+      
       toast({
         title: "Task deleted",
         description: `"${taskToDelete.title}" has been removed`,
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error('Delete task error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
         variant: "destructive",
       });
     }
@@ -117,8 +154,8 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   };
   
   // Handle save edit
-  const handleSaveEdit = (taskId: string) => {
-    if (!editForm.title || !editForm.description || !editForm.dueDate || !editForm.priority) {
+  const handleSaveEdit = async (taskId: string) => {
+    if (!editForm.title || !editForm.description || !editForm.due_date || !editForm.priority) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -127,24 +164,30 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       return;
     }
     
-    setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, ...editForm as Task } 
-        : task
-    ));
-    
-    setEditingTask(null);
-    setEditForm({});
-    
-    toast({
-      title: "Task updated",
-      description: `"${editForm.title}" has been updated`,
-    });
+    try {
+      const updatedTask = await taskService.updateTask(taskId, editForm);
+      
+      // Real-time subscription will handle state update
+      setEditingTask(null);
+      setEditForm({});
+      
+      toast({
+        title: "Task updated",
+        description: `"${updatedTask.title}" has been updated`,
+      });
+    } catch (error) {
+      console.error('Update task error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle add task
-  const handleAddTask = () => {
-    if (!newTask.title || !newTask.description || !newTask.dueDate || !newTask.priority) {
+  const handleAddTask = async () => {
+    if (!newTask.title || !newTask.description || !newTask.due_date || !newTask.priority) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -153,29 +196,38 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       return;
     }
 
-    const task: Task = {
-      id: uuid(),
-      title: newTask.title,
-      description: newTask.description,
-      dueDate: newTask.dueDate,
-      priority: newTask.priority as 'low' | 'medium' | 'high',
-      completed: false,
-    };
+    try {
+      await taskService.createTask({
+        title: newTask.title as string,
+        description: newTask.description,
+        due_date: newTask.due_date as string,
+        priority: newTask.priority as string,
+        completed: false,
+        status: 'pending'
+      });
+      
+      setNewTask({
+        title: '',
+        description: '',
+        due_date: '',
+        priority: 'medium',
+        completed: false,
+        status: 'pending'
+      });
+      setIsAddTaskDialogOpen(false);
 
-    setTasks([...tasks, task]);
-    setNewTask({
-      title: '',
-      description: '',
-      dueDate: '',
-      priority: 'medium',
-      completed: false,
-    });
-    setIsAddTaskDialogOpen(false);
-
-    toast({
-      title: "Task added",
-      description: `"${task.title}" has been added to your tasks`,
-    });
+      toast({
+        title: "Task added",
+        description: `"${newTask.title}" has been added to your tasks`,
+      });
+    } catch (error) {
+      console.error('Add task error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive",
+      });
+    }
   };
 
   // Filter tasks based on active filter
@@ -186,7 +238,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     if (searchQuery) {
       filtered = filtered.filter(task => 
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     
@@ -231,6 +283,17 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   React.useEffect(() => {
     setActiveFilter(filter);
   }, [filter]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="dashboard-card p-8">
+        <div className="flex items-center justify-center h-40">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dashboard-accent1"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-card">
@@ -313,7 +376,7 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                           placeholder="Task title"
                         />
                         <Input
-                          value={editForm.description}
+                          value={editForm.description || ''}
                           onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                           className="bg-white/10 border-white/20"
                           placeholder="Task description"
@@ -352,12 +415,12 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                     {editingTask === task.id ? (
                       <Input
                         type="datetime-local"
-                        value={editForm.dueDate?.slice(0, 16)}
-                        onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+                        value={editForm.due_date?.slice(0, 16)}
+                        onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
                         className="bg-white/10 border-white/20"
                       />
                     ) : (
-                      formatDate(task.dueDate)
+                      formatDate(task.due_date)
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -453,8 +516,8 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
                 id="task-due-date"
                 type="datetime-local"
                 className="col-span-3"
-                value={newTask.dueDate}
-                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                value={newTask.due_date}
+                onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

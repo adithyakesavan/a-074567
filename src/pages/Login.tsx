@@ -1,55 +1,45 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Home, Mail } from 'lucide-react';
+import { CheckSquare, Home, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all fields");
       return;
     }
     
-    // For demo purposes, we'll just simulate a login
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', email);
+    setLoading(true);
     
-    toast({
-      title: "Success!",
-      description: "You have been logged in",
-    });
-    
-    navigate('/dashboard');
+    try {
+      await signIn(email, password);
+      // Auth context will handle redirection and success toast
+    } catch (error) {
+      // Auth context already handles error toasts
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
-    // For demo purposes, we'll just simulate a login
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', 'user@gmail.com');
-    
-    toast({
-      title: "Success!",
-      description: "You have been logged in with Google",
-    });
-    
-    navigate('/dashboard');
+    toast.error("Google login is not implemented in this version");
   };
   
   return (
@@ -80,6 +70,7 @@ const Login = () => {
               className="bg-white/10 border-white/20 text-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -92,11 +83,22 @@ const Login = () => {
               className="bg-white/10 border-white/20 text-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-            Sign In
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </Button>
         </form>
         
@@ -115,6 +117,7 @@ const Login = () => {
           variant="outline" 
           className="w-full mt-6 bg-white/10 hover:bg-white/20 flex items-center justify-center gap-2"
           onClick={handleGoogleLogin}
+          disabled={loading}
         >
           <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

@@ -1,68 +1,56 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Home } from 'lucide-react';
+import { CheckSquare, Home, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [name, setName] = useState('');
+  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
-    if (!name || !email || !password || !confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+    if (!email || !password || !confirmPassword) {
+      toast.error("Please fill in all fields");
       return;
     }
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      toast.error("Passwords do not match");
       return;
     }
     
-    // For demo purposes, we'll just simulate a signup and login
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userName', name);
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     
-    toast({
-      title: "Success!",
-      description: "Account created successfully",
-    });
+    setLoading(true);
     
-    navigate('/dashboard');
+    try {
+      await signUp(email, password);
+      // Auth context handles success toast and redirection
+    } catch (error) {
+      // Auth context already handles error toasts
+      console.error('Signup error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
   
   const handleGoogleSignup = () => {
-    // For demo purposes, we'll just simulate a login
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', 'user@gmail.com');
-    localStorage.setItem('userName', 'Google User');
-    
-    toast({
-      title: "Success!",
-      description: "Account created with Google",
-    });
-    
-    navigate('/dashboard');
+    toast.error("Google signup is not implemented in this version");
   };
   
   return (
@@ -85,18 +73,6 @@ const Signup = () => {
         
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              className="bg-white/10 border-white/20 text-white"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -105,6 +81,7 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -117,6 +94,7 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           
@@ -129,11 +107,22 @@ const Signup = () => {
               className="bg-white/10 border-white/20 text-white"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-            Create Account
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...
+              </>
+            ) : (
+              'Create Account'
+            )}
           </Button>
         </form>
         
@@ -152,6 +141,7 @@ const Signup = () => {
           variant="outline" 
           className="w-full mt-6 bg-white/10 hover:bg-white/20 flex items-center justify-center gap-2"
           onClick={handleGoogleSignup}
+          disabled={loading}
         >
           <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
