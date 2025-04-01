@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare, Home, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,17 @@ import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { user, signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +37,7 @@ const Login = () => {
     try {
       await signIn(email, password);
       // Auth context will handle redirection and success toast
-    } catch (error) {
+    } catch (error: any) {
       // Auth context already handles error toasts
       console.error('Login error:', error);
     } finally {
