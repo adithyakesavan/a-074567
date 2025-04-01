@@ -85,11 +85,11 @@ export const taskService = {
       throw error;
     }
     
-    return data as Task[];
+    return data as unknown as Task[];
   },
 
   // Create a new task
-  createTask: async (task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => {
+  createTask: async (task: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     const user = await supabaseAuth.getCurrentUser();
     if (!user) {
       throw new Error('User not authenticated');
@@ -98,6 +98,7 @@ export const taskService = {
     const newTask = {
       ...task,
       email_id: user.email,
+      user_id: user.id,
     };
 
     const { data, error } = await supabase
@@ -124,7 +125,7 @@ export const taskService = {
       // Continue even if notification fails
     }
     
-    return data as Task;
+    return data as unknown as Task;
   },
 
   // Update a task
@@ -162,7 +163,7 @@ export const taskService = {
       }
     }
     
-    return data as Task;
+    return data as unknown as Task;
   },
 
   // Delete a task
@@ -196,8 +197,9 @@ export const notificationService = {
       throw new Error('User not authenticated');
     }
 
+    // Cast notifications table name as any to work around type constraint
     const { data, error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .select('*')
       .eq('email_id', user.email)
       .order('created_at', { ascending: false });
@@ -207,13 +209,14 @@ export const notificationService = {
       throw error;
     }
     
-    return data as Notification[];
+    return data as unknown as Notification[];
   },
 
   // Create a new notification
   createNotification: async (notification: Omit<Notification, 'id' | 'created_at'>) => {
+    // Cast notifications table name as any to work around type constraint
     const { data, error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .insert(notification)
       .select()
       .single();
@@ -223,7 +226,7 @@ export const notificationService = {
       throw error;
     }
     
-    return data as Notification;
+    return data as unknown as Notification;
   },
 
   // Mark notification as read
@@ -233,8 +236,9 @@ export const notificationService = {
       throw new Error('User not authenticated');
     }
 
+    // Cast notifications table name as any to work around type constraint
     const { data, error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .update({ status: 'read' })
       .eq('id', id)
       .eq('email_id', user.email)
@@ -246,7 +250,7 @@ export const notificationService = {
       throw error;
     }
     
-    return data as Notification;
+    return data as unknown as Notification;
   },
 
   // Delete a notification
@@ -256,8 +260,9 @@ export const notificationService = {
       throw new Error('User not authenticated');
     }
 
+    // Cast notifications table name as any to work around type constraint
     const { error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .delete()
       .eq('id', id)
       .eq('email_id', user.email);

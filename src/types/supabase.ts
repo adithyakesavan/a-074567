@@ -10,6 +10,8 @@ export interface Task {
   created_at: string;
   updated_at: string;
   email_id: string | null;
+  user_id: string;  // Added to match Supabase schema
+  category_id?: string | null;  // Added to match Supabase schema
 }
 
 export interface Notification {

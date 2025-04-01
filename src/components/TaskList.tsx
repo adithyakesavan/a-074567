@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle, Edit, Trash2, Search, PlusCircle, X, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -78,7 +77,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
           filter: `email_id=eq.${user.email}`
         },
         async () => {
-          // Refresh tasks when changes occur
           const data = await taskService.getTasks();
           setTasks(data);
         }
@@ -100,7 +98,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         completed: !taskToToggle.completed
       });
       
-      // Toast is handled by the component, but the database update is done through the service
       toast({
         title: updatedTask.completed ? "Task completed" : "Task unmarked",
         description: `"${updatedTask.title}" ${updatedTask.completed ? "has been completed" : "is now active"}`,
@@ -123,7 +120,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       
       await taskService.deleteTask(taskId);
 
-      // The real-time subscription will update the list, but we'll also update the local state
       setTasks(tasks.filter((task) => task.id !== taskId));
       
       toast({
@@ -167,7 +163,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     try {
       const updatedTask = await taskService.updateTask(taskId, editForm);
       
-      // Real-time subscription will handle state update
       setEditingTask(null);
       setEditForm({});
       
@@ -203,7 +198,8 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         due_date: newTask.due_date as string,
         priority: newTask.priority as string,
         completed: false,
-        status: 'pending'
+        status: 'pending',
+        email_id: user?.email || null
       });
       
       setNewTask({
@@ -234,7 +230,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
   const getFilteredTasks = () => {
     let filtered = tasks;
     
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(task => 
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -242,7 +237,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
       );
     }
     
-    // Apply status filter
     if (activeFilter === 'completed') {
       return filtered.filter(task => task.completed);
     } else if (activeFilter === 'pending') {
@@ -284,7 +278,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
     setActiveFilter(filter);
   }, [filter]);
 
-  // Show loading state
   if (loading) {
     return (
       <div className="dashboard-card p-8">
@@ -477,7 +470,6 @@ const TaskList = ({ filter = 'all' }: TaskListProps) => {
         </Table>
       </div>
 
-      {/* Add Task Dialog */}
       <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
