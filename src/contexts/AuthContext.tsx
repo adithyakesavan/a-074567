@@ -15,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
@@ -148,6 +149,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // The redirect will happen automatically
+      // The onAuthStateChange event will handle setting the user and session
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      toast.error(`Google sign in failed: ${error.message}`);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabaseAuth.signOut();
@@ -201,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    signInWithGoogle,
     updateProfile
   };
 
