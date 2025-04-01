@@ -33,41 +33,6 @@ export type Database = {
         }
         Relationships: []
       }
-      notifications: {
-        Row: {
-          created_at: string
-          email_id: string
-          id: string
-          message: string
-          status: string | null
-          task_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          email_id: string
-          id?: string
-          message: string
-          status?: string | null
-          task_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          email_id?: string
-          id?: string
-          message?: string
-          status?: string | null
-          task_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -99,10 +64,8 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string
-          email_id: string | null
           id: string
           priority: string
-          status: string | null
           title: string
           updated_at: string
           user_id: string
@@ -113,10 +76,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date: string
-          email_id?: string | null
           id?: string
           priority: string
-          status?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -127,10 +88,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string
-          email_id?: string | null
           id?: string
           priority?: string
-          status?: string | null
           title?: string
           updated_at?: string
           user_id?: string
